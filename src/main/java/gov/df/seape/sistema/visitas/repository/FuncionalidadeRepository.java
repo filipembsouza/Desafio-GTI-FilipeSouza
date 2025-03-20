@@ -14,102 +14,75 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repositório para a entidade Funcionalidade.
- * Fornece métodos para realizar operações de banco de dados relacionadas a Funcionalidades.
+ * Repositório para operações de persistência e consulta da entidade Funcionalidade.
+ * Gerencia as funcionalidades do sistema de segurança.
  */
 @Repository
 public interface FuncionalidadeRepository extends JpaRepository<Funcionalidade, Long> {
     
     /**
-     * Busca uma funcionalidade pela descrição exata, ignorando maiúsculas e minúsculas.
+     * Busca uma funcionalidade pela descrição exata, ignorando maiúsculas/minúsculas.
      * 
-     * @param descricao A descrição da funcionalidade a ser buscada
-     * @return A funcionalidade encontrada, ou vazia se não existir
+     * @param descricao Descrição da funcionalidade
+     * @return Optional contendo a funcionalidade, se encontrada
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.descricao) = LOWER(:descricao)")
     Optional<Funcionalidade> findByDescricaoIgnoreCase(@Param("descricao") String descricao);
     
     /**
-     * Busca uma funcionalidade pela authority exata, ignorando maiúsculas e minúsculas.
-     * Útil para integração com o Spring Security.
+     * Busca uma funcionalidade pela authority exata, ignorando maiúsculas/minúsculas.
      * 
-     * @param authority O identificador técnico da funcionalidade
-     * @return A funcionalidade encontrada, ou vazia se não existir
+     * @param authority Identificador técnico da funcionalidade
+     * @return Optional contendo a funcionalidade, se encontrada
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.authority) = LOWER(:authority)")
     Optional<Funcionalidade> findByAuthorityIgnoreCase(@Param("authority") String authority);
-
+    
     /**
-     * Lista todas as funcionalidades cadastradas, ordenadas alfabeticamente pela descrição.
-     *
-     * @return Lista de todas as funcionalidades disponíveis no sistema, ordenadas por descrição
+     * Lista todas as funcionalidades, ordenadas alfabeticamente.
+     * 
+     * @return Lista de funcionalidades ordenada
      */
     @Query("SELECT f FROM Funcionalidade f ORDER BY f.descricao ASC")
     List<Funcionalidade> findAllOrderByDescricao();
     
     /**
-     * Busca funcionalidades cuja descrição contenha o termo especificado.
-     * Útil para pesquisas em telas de gerenciamento de funcionalidades,
-     * onde o usuário pode digitar parte do nome para localizar uma funcionalidade.
+     * Busca funcionalidades que contenham a descrição especificada.
      * 
-     * @param descricao Termo de busca para a descrição da funcionalidade
-     * @return Lista de funcionalidades que contêm o termo na descrição, ordenadas alfabeticamente
+     * @param descricao Termo de busca
+     * @return Lista de funcionalidades correspondentes
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.descricao) LIKE LOWER(CONCAT('%', :descricao, '%')) ORDER BY f.descricao ASC")
     List<Funcionalidade> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao);
     
     /**
-     * Busca funcionalidades cuja descrição contenha o termo especificado, com suporte a paginação.
-     * Esta versão paginada é útil para interfaces que precisam mostrar resultados
-     * em blocos gerenciáveis e oferecer navegação entre páginas.
+     * Busca funcionalidades com suporte a paginação.
      * 
-     * @param descricao Termo de busca para a descrição da funcionalidade
-     * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
-     * @return Página de funcionalidades que contêm o termo na descrição
+     * @param descricao Termo de busca
+     * @param pageable Configurações de paginação
+     * @return Página de funcionalidades correspondentes
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")
     @NonNull
-    Page<Funcionalidade> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, @NonNull Pageable pageable);
+    Page<Funcionalidade> findByDescricaoContainingIgnoreCase(
+        @Param("descricao") String descricao, 
+        @NonNull Pageable pageable
+    );
     
     /**
-     * Lista todas as funcionalidades com suporte a paginação.
-     * Embora o número de funcionalidades seja geralmente pequeno,
-     * manter o padrão de paginação traz consistência com outros repositórios
-     * e prepara o sistema para possível crescimento futuro.
+     * Lista funcionalidades associadas a um determinado perfil.
      * 
-     * @param pageable Objeto com informações de paginação
-     * @return Página de funcionalidades
-     */
-    @Override
-    @NonNull
-    Page<Funcionalidade> findAll(@NonNull Pageable pageable);
-    
-    /**
-     * Lista todas as funcionalidades associadas a um determinado perfil.
-     * Útil para exibir quais permissões um perfil específico possui.
-     * 
-     * @param perfil O perfil para buscar funcionalidades associadas
-     * @return Lista de funcionalidades associadas ao perfil, ordenadas por descrição
+     * @param perfil Perfil para buscar funcionalidades
+     * @return Lista de funcionalidades do perfil
      */
     @Query("SELECT f FROM Funcionalidade f JOIN f.perfis p WHERE p = :perfil ORDER BY f.descricao ASC")
     List<Funcionalidade> findByPerfil(@Param("perfil") Perfil perfil);
     
     /**
-     * Lista todas as funcionalidades associadas a um determinado perfil, usando o ID diretamente.
-     * Esta versão evita a necessidade de carregar a entidade Perfil completa antes.
+     * Lista funcionalidades não associadas a um determinado perfil.
      * 
-     * @param perfilId O ID do perfil para buscar funcionalidades associadas
-     * @return Lista de funcionalidades associadas ao perfil, ordenadas por descrição
-     */
-    @Query("SELECT f FROM Funcionalidade f JOIN f.perfis p WHERE p.id = :perfilId ORDER BY f.descricao ASC")
-    List<Funcionalidade> findByPerfilId(@Param("perfilId") Long perfilId);
-    
-    /**
-     * Lista funcionalidades que não estão associadas a um determinado perfil.
-     * Útil para exibir funcionalidades disponíveis para adicionar a um perfil.
-     * 
-     * @param perfilId O ID do perfil
-     * @return Lista de funcionalidades não associadas ao perfil
+     * @param perfilId ID do perfil
+     * @return Lista de funcionalidades não associadas
      */
     @Query("SELECT f FROM Funcionalidade f WHERE f NOT IN " +
            "(SELECT f FROM Funcionalidade f JOIN f.perfis p WHERE p.id = :perfilId) " +

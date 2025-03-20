@@ -12,34 +12,56 @@ import java.util.List;
 public interface AgendamentoVisitaService {
     
     /**
-     * Agendar uma nova visita.
+     * Cria um novo agendamento de visita.
      * 
      * @param agendamentoDTO Dados do agendamento a ser criado
-     * @return O agendamento criado, com ID gerado
+     * @return O agendamento criado com ID gerado
      */
-    AgendamentoVisitaDTO agendarVisita(AgendamentoVisitaDTO agendamentoDTO);
+    AgendamentoVisitaDTO criarAgendamento(AgendamentoVisitaDTO agendamentoDTO);
     
     /**
-     * Atualizar um agendamento existente.
+     * Atualiza um agendamento existente.
      * 
      * @param id ID do agendamento a ser atualizado
      * @param agendamentoDTO Novos dados do agendamento
      * @return O agendamento atualizado
      */
-    AgendamentoVisitaDTO atualizarVisita(Long id, AgendamentoVisitaDTO agendamentoDTO);
+    AgendamentoVisitaDTO atualizarAgendamento(Long id, AgendamentoVisitaDTO agendamentoDTO);
     
     /**
-     * Buscar agendamentos aplicando filtros opcionais.
+     * Lista todos os agendamentos.
      * 
-     * @param filtro Objeto contendo critérios de busca
-     * @return Lista de DTOs representando os agendamentos encontrados
+     * @return Lista de todos os agendamentos
      */
-    List<AgendamentoVisitaDTO> buscarAgendamentosPorFiltros(FiltroAgendamentoDTO filtro);
+    List<AgendamentoVisitaDTO> listarAgendamentos();
     
     /**
-     * Cancelar um agendamento de visita.
+     * Busca um agendamento pelo seu ID.
+     * 
+     * @param id ID do agendamento a ser buscado
+     * @return O agendamento encontrado
+     */
+    AgendamentoVisitaDTO buscarAgendamentoPorId(Long id);
+    
+    /**
+     * Cancela um agendamento de visita.
      * 
      * @param id ID do agendamento a ser cancelado
+     */
+    void cancelarAgendamento(Long id);
+    
+    /**
+     * Filtra agendamentos de acordo com os critérios fornecidos.
+     * 
+     * @param filtro Objeto contendo critérios de filtro
+     * @return Lista de agendamentos filtrados
+     */
+    List<AgendamentoVisitaDTO> filtrarAgendamentos(FiltroAgendamentoDTO filtro);
+    
+    /**
+     * Cancela uma visita (método legado).
+     * 
+     * @param id ID da visita a ser cancelada
      */
     void cancelarVisita(Long id);
 }

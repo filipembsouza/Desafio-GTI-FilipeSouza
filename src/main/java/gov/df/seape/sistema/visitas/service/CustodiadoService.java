@@ -1,45 +1,89 @@
 package gov.df.seape.sistema.visitas.service;
 
-import gov.df.seape.sistema.visitas.model.Custodiado;
+import gov.df.seape.sistema.visitas.dto.CustodiadoRequestDTO;
+import gov.df.seape.sistema.visitas.dto.CustodiadoResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Interface de serviço para operações relacionadas a Custodiados.
- * Define o contrato de operações disponíveis para manipulação de custodiados.
+ * Interface de serviço para gerenciamento de Custodiados.
+ * Define operações para manipulação de detentos no sistema prisional.
  */
 public interface CustodiadoService {
     
     /**
-     * Busca todos os custodiados cadastrados.
+     * Cria um novo custodiado.
+     * 
+     * @param custodiadoRequestDTO Dados para criação do custodiado
+     * @return Custodiado criado
+     */
+    CustodiadoResponseDTO criarCustodiado(CustodiadoRequestDTO custodiadoRequestDTO);
+    
+    /**
+     * Atualiza um custodiado existente.
+     * 
+     * @param id Identificador do custodiado
+     * @param custodiadoRequestDTO Novos dados do custodiado
+     * @return Custodiado atualizado
+     */
+    CustodiadoResponseDTO atualizarCustodiado(Long id, CustodiadoRequestDTO custodiadoRequestDTO);
+    
+    /**
+     * Busca um custodiado pelo seu identificador.
+     * 
+     * @param id Identificador do custodiado
+     * @return Optional com o custodiado encontrado
+     */
+    Optional<CustodiadoResponseDTO> buscarCustodiadoPorId(Long id);
+    
+    /**
+     * Busca um custodiado pelo número do prontuário.
+     * 
+     * @param numeroProntuario Número do prontuário
+     * @return Optional com o custodiado encontrado
+     */
+    Optional<CustodiadoResponseDTO> buscarCustodiadoPorNumeroProntuario(String numeroProntuario);
+    
+    /**
+     * Lista todos os custodiados cadastrados.
      * 
      * @return Lista de todos os custodiados
      */
-    List<Custodiado> listarTodos();
+    List<CustodiadoResponseDTO> listarTodosCustodiados();
     
     /**
-     * Busca um custodiado pelo seu ID.
+     * Lista custodiados com suporte a paginação.
      * 
-     * @param id ID do custodiado
-     * @return O custodiado encontrado
+     * @param pageable Configurações de paginação
+     * @return Página de custodiados
      */
-    Custodiado buscarPorId(Long id);
+    Page<CustodiadoResponseDTO> listarCustodiadosPaginado(Pageable pageable);
     
     /**
-     * Busca um custodiado pelo número de prontuário.
+     * Remove um custodiado pelo seu identificador.
      * 
-     * @param numeroProntuario Número do prontuário
-     * @return O custodiado encontrado
+     * @param id Identificador do custodiado a ser removido
      */
-    Custodiado buscarPorNumeroProntuario(String numeroProntuario);
+    void excluirCustodiado(Long id);
     
     /**
-     * Busca custodiados por parte do nome.
+     * Busca custodiados por nome.
      * 
-     * @param nome Parte do nome para busca
-     * @return Lista de custodiados que atendem ao critério
+     * @param nome Termo de busca no nome
+     * @return Lista de custodiados correspondentes
      */
-    List<Custodiado> buscarPorNome(String nome);
+    List<CustodiadoResponseDTO> buscarCustodiadoPorNome(String nome);
+    
+    /**
+     * Busca custodiados por vulgo.
+     * 
+     * @param vulgo Termo de busca no vulgo
+     * @return Lista de custodiados correspondentes
+     */
+    List<CustodiadoResponseDTO> buscarCustodiadoPorVulgo(String vulgo);
     
     /**
      * Busca custodiados por unidade penal.
@@ -47,5 +91,5 @@ public interface CustodiadoService {
      * @param unidadePenalId ID da unidade penal
      * @return Lista de custodiados da unidade penal
      */
-    List<Custodiado> buscarPorUnidadePenal(Long unidadePenalId);
+    List<CustodiadoResponseDTO> buscarCustodiadoPorUnidadePenal(Long unidadePenalId);
 }

@@ -23,7 +23,7 @@ import lombok.ToString;
 @Setter // Gera automaticamente os métodos setter para os atributos
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) // Usa apenas o ID para comparação
 @ToString(exclude = {"vinculos", "perfis"}) // Evita loop infinito ao imprimir a entidade
-@NoArgsConstructor // Construtor sem argumentos obrigatório para JPA
+@NoArgsConstructor // Construtor padrão sem argumentos obrigatório para JPA
 @Entity
 public class Funcionalidade {
     

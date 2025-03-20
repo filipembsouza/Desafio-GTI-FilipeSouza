@@ -1,21 +1,30 @@
 package gov.df.seape.sistema.visitas.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
+/**
+ * DTO para transferência de dados de pessoa na resposta da API.
+ * Expõe informações básicas da pessoa, preservando segurança e privacidade.
+ */
 public class PessoaResponseDTO {
+    /**
+     * Identificador único da pessoa.
+     */
     private Long id;
 
-    @NotBlank(message = "O nome é obrigatório")
+    /**
+     * Nome completo da pessoa.
+     */
     private String nome;
 
-    @NotBlank(message = "O CPF é obrigatório")
-    @Pattern(regexp = "\\d{11}", message = "CPF deve conter 11 dígitos numéricos")
+    /**
+     * CPF da pessoa (pode ser parcialmente mascarado).
+     */
     private String cpf;
 
-    @Past(message = "A data de nascimento deve ser no passado")
+    /**
+     * Data de nascimento da pessoa.
+     */
     private LocalDate dataNascimento;
 
     // Construtores

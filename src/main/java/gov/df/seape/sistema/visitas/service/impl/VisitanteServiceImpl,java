@@ -1,0 +1,157 @@
+package gov.df.seape.sistema.visitas.service.impl;
+
+import gov.df.seape.sistema.visitas.dto.VisitanteRequestDTO;
+import gov.df.seape.sistema.visitas.dto.VisitanteResponseDTO;
+import gov.df.seape.sistema.visitas.exception.RecursoNaoEncontradoException;
+import gov.df.seape.sistema.visitas.model.Pessoa;
+import gov.df.seape.sistema.visitas.model.Visitante;
+import gov.df.seape.sistema.visitas.repository.PessoaRepository;
+import gov.df.seape.sistema.visitas.repository.VisitanteRepository;
+import gov.df.seape.sistema.visitas.service.VisitanteService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * Implementação do serviço de Visitante.
+ * Gerencia operações relacionadas aos visitantes no sistema prisional.
+ */
+@Service
+@Transactional
+public class VisitanteServiceImpl implements VisitanteService {
+
+    private final VisitanteRepository visitanteRepository;
+    private final PessoaRepository pessoaRepository;
+
+    @Autowired
+    public VisitanteServiceImpl(
+        VisitanteRepository visitanteRepository,
+        PessoaRepository pessoaRepository
+    ) {
+        this.visitanteRepository = visitanteRepository;
+        this.pessoaRepository = pessoaRepository;
+    }
+
+    /**
+     * Converte VisitanteRequestDTO para entidade Visitante
+     */
+    private Visitante convertToEntity(@Valid VisitanteRequestDTO dto) {
+        // Criar ou buscar pessoa
+        Pessoa pessoa = pessoaRepository.findByCpf(dto.getPessoa().getCpf())
+                .orElseGet(() -> {
+                    Pessoa novaPessoa = new Pessoa(
+                        dto.getPessoa().getNome(), 
+                        dto.getPessoa().getCpf(), 
+                        dto.getPessoa().getDataNascimento()
+                    );
+                    return pessoaRepository.save(novaPessoa);
+                });
+
+        return new Visitante(pessoa, dto.getSenhaOnline());
+    }
+
+    /**
+     * Converte entidade Visitante para VisitanteResponseDTO
+     */
+    private VisitanteResponseDTO convertToResponseDTO(Visitante entity) {
+        return new VisitanteResponseDTO(
+            entity.getId(),
+            new PessoaResponseDTO(
+                entity.getPessoa().getId(),
+                entity.getPessoa().getNome(),
+                entity.getPessoa().getCpf(),
+                entity.getPessoa().getDataNascimento()
+            ),
+            entity.getSenhaOnline() != null && !entity.getSenhaOnline().isEmpty()
+        );
+    }
+
+    @Override
+    @Transactional
+    public VisitanteResponseDTO criarVisitante(@Valid VisitanteRequestDTO visitanteRequestDTO) {
+        // Verificar se já existe visitante com este CPF
+        Optional<Visitante> visitanteExistente = visitanteRepository.findByCpf(visitanteRequestDTO.getPessoa().getCpf());
+        
+        if (visitanteExistente.isPresent()) {
+            throw new IllegalArgumentException("Já existe um visitante cadastrado com este CPF");
+        }
+
+        Visitante visitante = convertToEntity(visitanteRequestDTO);
+        visitante = visitanteRepository.save(visitante);
+        return convertToResponseDTO(visitante);
+    }
+
+    @Override
+    @Transactional
+    public VisitanteResponseDTO atualizarVisitante(Long id, @Valid VisitanteRequestDTO visitanteRequestDTO) {
+        Visitante visitanteExistente = visitanteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + id));
+        
+        // Atualizar pessoa
+        Pessoa pessoa = visitanteExistente.getPessoa();
+        pessoa.setNome(visitanteRequestDTO.getPessoa().getNome());
+        pessoa.setCpf(visitanteRequestDTO.getPessoa().getCpf());
+        pessoa.setDataNascimento(visitanteRequestDTO.getPessoa().getDataNascimento());
+        pessoaRepository.save(pessoa);
+
+        // Atualizar visitante
+        visitanteExistente.setSenhaOnline(visitanteRequestDTO.getSenhaOnline());
+        
+        visitanteExistente = visitanteRepository.save(visitanteExistente);
+        
+        return convertToResponseDTO(visitanteExistente);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<VisitanteResponseDTO> buscarVisitantePorId(Long id) {
+        return visitanteRepository.findById(id)
+                .map(this::convertToResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<VisitanteResponseDTO> buscarVisitantePorCpf(String cpf) {
+        return visitanteRepository.findByCpf(cpf)
+                .map(this::convertToResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VisitanteResponseDTO> listarTodosVisitantes() {
+        return visitanteRepository.findAll().stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<VisitanteResponseDTO> listarVisitantesPaginado(Pageable pageable) {
+        return visitanteRepository.findAll(pageable)
+                .map(this::convertToResponseDTO);
+    }
+
+    @Override
+    @Transactional
+    public void excluirVisitante(Long id) {
+        Visitante visitante = visitanteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + id));
+        
+        visitanteRepository.delete(visitante);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VisitanteResponseDTO> buscarVisitantePorNome(String nome) {
+        return visitanteRepository.findByNomeContainingIgnoreCase(nome).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+}

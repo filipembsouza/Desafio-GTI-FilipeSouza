@@ -1,0 +1,232 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< gov.df.seape:sistema-visitas >--------------------
+[INFO] Building sistema-visitas 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.3:run (default-cli) > test-compile @ sistema-visitas >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ sistema-visitas ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ sistema-visitas ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ sistema-visitas ---
+[INFO] skip non existing resourceDirectory C:\Users\filip\OneDrive\�rea de Trabalho\Desafio_GTI\sistema-visitas\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ sistema-visitas ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:3.4.3:run (default-cli) < test-compile @ sistema-visitas <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.3:run (default-cli) @ sistema-visitas ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.3)
+
+2025-03-18T16:10:18.144-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] g.d.s.s.v.SistemaVisitasApplication      : Starting SistemaVisitasApplication using Java 23.0.2 with PID 22584 (C:\Users\filip\OneDrive\Área de Trabalho\Desafio_GTI\sistema-visitas\target\classes started by filip in C:\Users\filip\OneDrive\Área de Trabalho\Desafio_GTI\sistema-visitas)
+2025-03-18T16:10:18.144-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] g.d.s.s.v.SistemaVisitasApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-03-18T16:10:18.181-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-03-18T16:10:18.181-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-03-18T16:10:19.028-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-18T16:10:19.082-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47 ms. Found 10 JPA repository interfaces.
+2025-03-18T16:10:19.659-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-03-18T16:10:19.680-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-03-18T16:10:19.680-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.36]
+2025-03-18T16:10:19.709-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-03-18T16:10:19.709-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1528 ms
+2025-03-18T16:10:19.937-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-18T16:10:19.989-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.8.Final
+2025-03-18T16:10:20.021-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-03-18T16:10:20.210-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-03-18T16:10:20.230-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-18T16:10:20.372-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:sistema_visitas_db user=SA
+2025-03-18T16:10:20.372-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-18T16:10:20.397-03:00  WARN 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-03-18T16:10:20.410-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.2.224
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-03-18T16:10:21.081-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-03-18T16:10:21.129-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table agendamento_visita (id bigint generated by default as identity, data_hora_agendamento timestamp(6) not null, custodiado_id bigint not null, status_id bigint not null, visitante_id bigint not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table custodiado (id bigint generated by default as identity, numero_prontuario varchar(45) not null, vulgo varchar(45), pessoa_id bigint not null, unidade_penal_id bigint not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table funcionalidade (id bigint generated by default as identity, authority varchar(200), descricao varchar(45) not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table perfil (id_perfil bigint generated by default as identity, descricao varchar(100) not null, primary key (id_perfil))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table pessoa (id bigint generated by default as identity, cpf varchar(45) not null, data_nascimento date not null, nome varchar(45) not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table status (id bigint generated by default as identity, descricao varchar(45) not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table unidade_penal (id bigint generated by default as identity, descricao varchar(45), nome varchar(255) not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table usuario (id bigint generated by default as identity, email varchar(255) not null, senha varchar(255) not null, id_perfil bigint, pessoa_id bigint, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table vinc_perfil_funcionalidade (id bigint generated by default as identity, funcionalidade_id bigint not null, id_perfil bigint not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table visitante (id bigint generated by default as identity, senha_online varchar(45), pessoa_id bigint not null, primary key (id))
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario drop constraint if exists UK5171l57faosmj8myawaucatdw
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint UK5171l57faosmj8myawaucatdw unique (email)
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FKlbnssihcuxa1aougx0ceg71q6 foreign key (custodiado_id) references custodiado
+2025-03-18T16:10:21.145-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FK8ijpt6ik542gu8f6jtn2hd372 foreign key (status_id) references status
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FKqdcgd9vb0yvwmg0wrcqewgstv foreign key (visitante_id) references visitante
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists custodiado add constraint FKaj3jxdbethxvi1ricgnmd4mxl foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists custodiado add constraint FKnlokf8l9ttbl5vdpk9o7t2ar9 foreign key (unidade_penal_id) references unidade_penal
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint FK131gkl0dt1966rsw6dmesnsxw foreign key (id_perfil) references perfil
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint FK9kjbckbnh9ryosephjpbojisa foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists vinc_perfil_funcionalidade add constraint FKo3r0stycptwe9ubkjijmoxqf7 foreign key (funcionalidade_id) references funcionalidade
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists vinc_perfil_funcionalidade add constraint FKrpq79golnoid03181ma3fnxjr foreign key (id_perfil) references perfil
+2025-03-18T16:10:21.159-03:00 DEBUG 22584 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists visitante add constraint FKdkh646mjrsuqhglgtpb0x87iy foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:21.159-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-18T16:10:21.441-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-03-18T16:10:22.142-03:00  WARN 22584 --- [sistema-visitas] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-03-18T16:10:22.672-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-03-18T16:10:22.950-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-03-18T16:10:24.128-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:sistema_visitas_db'
+2025-03-18T16:10:24.198-03:00  WARN 22584 --- [sistema-visitas] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2025-03-18T16:10:24.240-03:00  WARN 22584 --- [sistema-visitas] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-03-18T16:10:24.240-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-03-18T16:10:24.240-03:00  WARN 22584 --- [sistema-visitas] [  restartedMain] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+2025-03-18T16:10:24.240-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-18T16:10:24.254-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-18T16:10:24.260-03:00  INFO 22584 --- [sistema-visitas] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-03-18T16:10:24.269-03:00 ERROR 22584 --- [sistema-visitas] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
+[INFO] 
+[INFO] >>> spring-boot:3.4.3:run (default-cli) > test-compile @ sistema-visitas >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ sistema-visitas ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ sistema-visitas ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ sistema-visitas ---
+[INFO] skip non existing resourceDirectory C:\Users\filip\OneDrive\�rea de Trabalho\Desafio_GTI\sistema-visitas\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ sistema-visitas ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:3.4.3:run (default-cli) < test-compile @ sistema-visitas <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.3:run (default-cli) @ sistema-visitas ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.3)
+
+2025-03-18T16:10:24.954-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] g.d.s.s.v.SistemaVisitasApplication      : Starting SistemaVisitasApplication using Java 23.0.2 with PID 26420 (C:\Users\filip\OneDrive\Área de Trabalho\Desafio_GTI\sistema-visitas\target\classes started by filip in C:\Users\filip\OneDrive\Área de Trabalho\Desafio_GTI\sistema-visitas)
+2025-03-18T16:10:24.970-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] g.d.s.s.v.SistemaVisitasApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-03-18T16:10:25.012-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-03-18T16:10:25.012-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-03-18T16:10:25.799-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-18T16:10:25.853-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 10 JPA repository interfaces.
+2025-03-18T16:10:26.481-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-03-18T16:10:26.491-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-03-18T16:10:26.491-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.36]
+2025-03-18T16:10:26.533-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-03-18T16:10:26.533-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1521 ms
+2025-03-18T16:10:26.780-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-18T16:10:26.866-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.8.Final
+2025-03-18T16:10:26.906-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-03-18T16:10:27.124-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-03-18T16:10:27.157-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-18T16:10:27.302-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:sistema_visitas_db user=SA
+2025-03-18T16:10:27.302-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-18T16:10:27.327-03:00  WARN 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-03-18T16:10:27.343-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.2.224
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-03-18T16:10:28.019-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-03-18T16:10:28.057-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table agendamento_visita (id bigint generated by default as identity, data_hora_agendamento timestamp(6) not null, custodiado_id bigint not null, status_id bigint not null, visitante_id bigint not null, primary key (id))
+2025-03-18T16:10:28.064-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table custodiado (id bigint generated by default as identity, numero_prontuario varchar(45) not null, vulgo varchar(45), pessoa_id bigint not null, unidade_penal_id bigint not null, primary key (id))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table funcionalidade (id bigint generated by default as identity, authority varchar(200), descricao varchar(45) not null, primary key (id))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table perfil (id_perfil bigint generated by default as identity, descricao varchar(100) not null, primary key (id_perfil))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table pessoa (id bigint generated by default as identity, cpf varchar(45) not null, data_nascimento date not null, nome varchar(45) not null, primary key (id))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table status (id bigint generated by default as identity, descricao varchar(45) not null, primary key (id))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table unidade_penal (id bigint generated by default as identity, descricao varchar(45), nome varchar(255) not null, primary key (id))
+2025-03-18T16:10:28.065-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table usuario (id bigint generated by default as identity, email varchar(255) not null, senha varchar(255) not null, id_perfil bigint, pessoa_id bigint, primary key (id))
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table vinc_perfil_funcionalidade (id bigint generated by default as identity, funcionalidade_id bigint not null, id_perfil bigint not null, primary key (id))
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : create table visitante (id bigint generated by default as identity, senha_online varchar(45), pessoa_id bigint not null, primary key (id))
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario drop constraint if exists UK5171l57faosmj8myawaucatdw
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint UK5171l57faosmj8myawaucatdw unique (email)
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FKlbnssihcuxa1aougx0ceg71q6 foreign key (custodiado_id) references custodiado
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FK8ijpt6ik542gu8f6jtn2hd372 foreign key (status_id) references status
+2025-03-18T16:10:28.070-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists agendamento_visita add constraint FKqdcgd9vb0yvwmg0wrcqewgstv foreign key (visitante_id) references visitante
+2025-03-18T16:10:28.080-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists custodiado add constraint FKaj3jxdbethxvi1ricgnmd4mxl foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:28.082-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists custodiado add constraint FKnlokf8l9ttbl5vdpk9o7t2ar9 foreign key (unidade_penal_id) references unidade_penal
+2025-03-18T16:10:28.083-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint FK131gkl0dt1966rsw6dmesnsxw foreign key (id_perfil) references perfil
+2025-03-18T16:10:28.084-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists usuario add constraint FK9kjbckbnh9ryosephjpbojisa foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:28.084-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists vinc_perfil_funcionalidade add constraint FKo3r0stycptwe9ubkjijmoxqf7 foreign key (funcionalidade_id) references funcionalidade
+2025-03-18T16:10:28.086-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists vinc_perfil_funcionalidade add constraint FKrpq79golnoid03181ma3fnxjr foreign key (id_perfil) references perfil
+2025-03-18T16:10:28.087-03:00 DEBUG 26420 --- [sistema-visitas] [  restartedMain] org.hibernate.SQL                        : alter table if exists visitante add constraint FKdkh646mjrsuqhglgtpb0x87iy foreign key (pessoa_id) references pessoa
+2025-03-18T16:10:28.089-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-18T16:10:28.347-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-03-18T16:10:29.048-03:00  WARN 26420 --- [sistema-visitas] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-03-18T16:10:29.549-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-03-18T16:10:29.813-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-03-18T16:10:30.616-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:sistema_visitas_db'
+2025-03-18T16:10:30.656-03:00  WARN 26420 --- [sistema-visitas] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2025-03-18T16:10:30.695-03:00  WARN 26420 --- [sistema-visitas] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-03-18T16:10:30.698-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-03-18T16:10:30.701-03:00  WARN 26420 --- [sistema-visitas] [  restartedMain] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+2025-03-18T16:10:30.702-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-18T16:10:30.703-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-18T16:10:30.713-03:00  INFO 26420 --- [sistema-visitas] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-03-18T16:10:30.724-03:00 ERROR 26420 --- [sistema-visitas] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  14.583 s
+[INFO] Finished at: 2025-03-18T16:10:30-03:00
+[INFO] ------------------------------------------------------------------------

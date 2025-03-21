@@ -50,12 +50,21 @@ public class Visitante {
      * Atualiza a senha online do visitante.
      * 
      * @param novaSenha Nova senha online
+     * @throws SenhaOnlineInvalidaException se a nova senha for nula, vazia ou exceder 45 caracteres.
      */
     public void atualizarSenhaOnline(String novaSenha) {
-        if (novaSenha != null && novaSenha.length() <= 45) {
-            this.senhaOnline = novaSenha;
-        } else {
-            throw new IllegalArgumentException("Senha online inválida");
+        if (novaSenha == null || novaSenha.isEmpty() || novaSenha.length() > 45) {
+            throw new SenhaOnlineInvalidaException("Senha online inválida: deve ser não nula, não vazia e ter no máximo 45 caracteres.");
+        }
+        this.senhaOnline = novaSenha;
+    }
+    
+    /**
+     * Exceção customizada para senha online inválida.
+     */
+    public static class SenhaOnlineInvalidaException extends RuntimeException {
+        public SenhaOnlineInvalidaException(String message) {
+            super(message);
         }
     }
 }

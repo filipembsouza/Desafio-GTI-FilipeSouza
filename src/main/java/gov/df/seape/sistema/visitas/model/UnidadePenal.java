@@ -49,10 +49,18 @@ public class UnidadePenal {
 
     /**
      * Adiciona um custodiado à unidade penal.
+     * Verifica se a capacidade não foi excedida e se já não existe um custodiado
+     * com o mesmo número de prontuário.
      * 
      * @param custodiado Custodiado a ser adicionado
      */
     public void adicionarCustodiado(Custodiado custodiado) {
+        // Verifica duplicidade pelo número do prontuário
+        boolean existe = custodiados.stream()
+                .anyMatch(c -> c.getNumeroProntuario().equals(custodiado.getNumeroProntuario()));
+        if (existe) {
+            throw new IllegalStateException("Custodiado com este número de prontuário já está associado à unidade penal.");
+        }
         if (custodiados.size() < capacidade) {
             custodiados.add(custodiado);
             custodiado.setUnidadePenal(this);

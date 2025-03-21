@@ -2,11 +2,12 @@ package gov.df.seape.sistema.visitas.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * Entidade associativa que representa a tabela VINC_PERFIL_FUNCIONALIDADE no banco de dados.
@@ -16,10 +17,9 @@ import lombok.ToString;
  * Através desta entidade, o sistema pode definir precisamente quais ações cada tipo
  * de usuário pode realizar, criando uma matriz de permissões altamente configurável.
  */
-@Getter // Gera automaticamente os métodos getter para os atributos
-@Setter // Gera automaticamente os métodos setter para os atributos
-@EqualsAndHashCode(onlyExplicitlyIncluded = true) // Usa apenas o ID para comparação
-@ToString(exclude = {"perfil", "funcionalidade"}) // Evita loop infinito ao imprimir a entidade
+@Getter
+@Setter
+@ToString(exclude = {"perfil", "funcionalidade"})
 @NoArgsConstructor
 @Entity
 @Table(
@@ -39,7 +39,6 @@ public class VincPerfilFuncionalidade {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include // Usa apenas o ID para comparar objetos
     @Column(name = "id")
     private Long id;
     
@@ -48,9 +47,6 @@ public class VincPerfilFuncionalidade {
      * Indica qual perfil de usuário está recebendo uma determinada funcionalidade.
      * Esta associação é obrigatória e representa um dos lados da relação
      * muitos-para-muitos entre perfis e funcionalidades.
-     * 
-     * Por exemplo: o perfil "Agente Penitenciário" pode ter várias funcionalidades
-     * associadas, como "Verificar Visitantes", "Registrar Entrada", etc.
      */
     @NotNull(message = "O perfil é obrigatório")
     @ManyToOne
@@ -62,9 +58,6 @@ public class VincPerfilFuncionalidade {
      * Indica qual funcionalidade está sendo atribuída a um determinado perfil.
      * Esta associação é obrigatória e representa o outro lado da relação
      * muitos-para-muitos entre perfis e funcionalidades.
-     * 
-     * Por exemplo: a funcionalidade "Agendar Visita" pode estar associada
-     * a vários perfis, como "Atendente", "Administrador", etc.
      */
     @NotNull(message = "A funcionalidade é obrigatória")
     @ManyToOne
@@ -80,5 +73,27 @@ public class VincPerfilFuncionalidade {
     public VincPerfilFuncionalidade(Perfil perfil, Funcionalidade funcionalidade) {
         this.perfil = perfil;
         this.funcionalidade = funcionalidade;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VincPerfilFuncionalidade)) return false;
+        VincPerfilFuncionalidade that = (VincPerfilFuncionalidade) o;
+        // Se ambos possuem id, comparamos apenas os ids.
+        if (this.id != null && that.id != null) {
+            return this.id.equals(that.id);
+        }
+        // Se os ids forem nulos, compara os atributos perfil e funcionalidade.
+        return Objects.equals(perfil, that.perfil) &&
+               Objects.equals(funcionalidade, that.funcionalidade);
+    }
+    
+    @Override
+    public int hashCode() {
+        if (id != null) {
+            return Objects.hash(id);
+        }
+        return Objects.hash(perfil, funcionalidade);
     }
 }

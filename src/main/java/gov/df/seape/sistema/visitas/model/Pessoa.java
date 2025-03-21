@@ -43,12 +43,52 @@ public class Pessoa {
     private LocalDate dataNascimento;
 
     /**
-     * Idade calculada com base na data de nascimento.
-     * Campo transiente não persistido no banco de dados.
+     * Calcula e retorna a idade baseada na data de nascimento.
+     * 
+     * @return Idade em anos.
      */
-    @Transient
-    private Integer idade;
+    public int getIdade() {
+        if (this.dataNascimento != null) {
+            return Period.between(this.dataNascimento, LocalDate.now()).getYears();
+        }
+        return 0;
+    }
 
+    /**
+     * Método para validar o CPF utilizando o algoritmo padrão.
+     * 
+     * @return true se o CPF for válido, false caso contrário.
+     */
+    public boolean validarCPF() {
+        if (cpf == null || !cpf.matches("\\d{11}")) {
+            return false;
+        }
+        // Verifica se todos os dígitos são iguais (ex.: "11111111111")
+        if (cpf.chars().distinct().count() == 1) {
+            return false;
+        }
+        try {
+            int soma = 0;
+            for (int i = 0; i < 9; i++) {
+                soma += Character.getNumericValue(cpf.charAt(i)) * (10 - i);
+            }
+            int resto = 11 - (soma % 11);
+            int digito1 = resto >= 10 ? 0 : resto;
+
+            soma = 0;
+            for (int i = 0; i < 10; i++) {
+                soma += Character.getNumericValue(cpf.charAt(i)) * (11 - i);
+            }
+            resto = 11 - (soma % 11);
+            int digito2 = resto >= 10 ? 0 : resto;
+
+            return digito1 == Character.getNumericValue(cpf.charAt(9)) &&
+                   digito2 == Character.getNumericValue(cpf.charAt(10));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
     /**
      * Construtor personalizado para criação de pessoa.
      * 
@@ -60,27 +100,5 @@ public class Pessoa {
         this.nome = nome;
         this.cpf = cpf;
         this.dataNascimento = dataNascimento;
-        calcularIdade();
-    }
-
-    /**
-     * Método para calcular a idade baseada na data de nascimento.
-     * Atualiza o campo transiente idade.
-     */
-    public void calcularIdade() {
-        if (this.dataNascimento != null) {
-            this.idade = Period.between(this.dataNascimento, LocalDate.now()).getYears();
-        }
-    }
-
-    /**
-     * Método para validar o CPF.
-     * 
-     * @return true se o CPF for válido, false caso contrário
-     */
-    public boolean validarCPF() {
-        // Implementação de validação de CPF
-        // Algoritmo de validação do CPF
-        return cpf != null && cpf.length() == 11;
     }
 }

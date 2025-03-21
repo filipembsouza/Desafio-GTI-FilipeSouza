@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Entidade que representa os perfis de usuário no sistema.
@@ -23,6 +24,7 @@ public class Perfil {
      * Identificador único do perfil.
      * Gerado automaticamente, seguindo especificação do diagrama.
      */
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -38,6 +40,17 @@ public class Perfil {
     private String descricao;
 
     /**
+     * Relação direta com Funcionalidade para consultas de permissão.
+     */
+    @ManyToMany
+    @JoinTable(
+    name = "vinc_perfil_funcionalidade",
+    joinColumns = @JoinColumn(name = "id_perfil"),
+    inverseJoinColumns = @JoinColumn(name = "funcionalidade_id")
+    ) 
+private List<Funcionalidade> funcionalidades = new ArrayList<>();
+
+    /**
      * Vínculos entre Perfil e Funcionalidade.
      * Representa as permissões associadas ao perfil.
      */
@@ -45,15 +58,15 @@ public class Perfil {
     private List<VincPerfilFuncionalidade> vinculos = new ArrayList<>();
 
     /**
-     * Relação direta com Funcionalidade para consultas de permissão.
+     * Método auxiliar para obter as funcionalidades do perfil a partir dos vínculos.
+     * 
+     * @return Lista de funcionalidades associadas.
      */
-    @ManyToMany
-    @JoinTable(
-        name = "vinc_perfil_funcionalidade",
-        joinColumns = @JoinColumn(name = "id_perfil"),
-        inverseJoinColumns = @JoinColumn(name = "funcionalidade_id")
-    )
-    private List<Funcionalidade> funcionalidades = new ArrayList<>();
+    public List<Funcionalidade> getFuncionalidades() {
+        return vinculos.stream()
+                .map(VincPerfilFuncionalidade::getFuncionalidade)
+                .toList();
+    }
 
     /**
      * Verifica se o perfil possui uma determinada funcionalidade.
@@ -62,18 +75,19 @@ public class Perfil {
      * @return true se o perfil possuir a funcionalidade, false caso contrário
      */
     public boolean possuiFuncionalidade(String authority) {
-        return funcionalidades.stream()
-            .anyMatch(f -> authority.equals(f.getAuthority()));
+        return getFuncionalidades().stream()
+                .anyMatch(f -> authority.equals(f.getAuthority()));
     }
 
     /**
-     * Adiciona uma funcionalidade ao perfil.
+     * Adiciona uma funcionalidade ao perfil através da criação de um vínculo.
      * 
      * @param funcionalidade Funcionalidade a ser adicionada
      */
     public void adicionarFuncionalidade(Funcionalidade funcionalidade) {
         if (!possuiFuncionalidade(funcionalidade.getAuthority())) {
-            this.funcionalidades.add(funcionalidade);
+            VincPerfilFuncionalidade vinculo = new VincPerfilFuncionalidade(this, funcionalidade);
+            this.vinculos.add(vinculo);
         }
     }
 }

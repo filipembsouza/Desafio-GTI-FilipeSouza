@@ -21,10 +21,11 @@ public class PerfilResponseDTO {
         this.id = perfil.getId();
         this.descricao = perfil.getDescricao();
         
+        // Recupera funcionalidades a partir dos vínculos (método getFuncionalidades() em Perfil)
         if (perfil.getFuncionalidades() != null) {
             this.funcionalidades = perfil.getFuncionalidades().stream()
                 .map(FuncionalidadeResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList(); // Usando toList() que retorna uma lista imutável
         } else {
             this.funcionalidades = new ArrayList<>();
         }

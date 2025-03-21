@@ -40,12 +40,12 @@ public class Usuario {
     private String senha;
     
     @NotNull(message = "O perfil é obrigatório")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_perfil", nullable = false)
     private Perfil perfil;
     
     @NotNull(message = "A pessoa é obrigatória")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pessoa_id", nullable = false)
     private Pessoa pessoa;
 

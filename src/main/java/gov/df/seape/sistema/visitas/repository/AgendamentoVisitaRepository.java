@@ -258,4 +258,15 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim,
             @Param("statusCanceladoId") Long statusCanceladoId);
+
+      
+      /**
+       * Obtém IDs de visitantes que visitaram um determinado custodiado.
+       * 
+       * @param custodiadoId ID do custodiado
+       * @return Lista de IDs de visitantes
+       */
+    @Query("SELECT DISTINCT a.visitante.id FROM AgendamentoVisita a WHERE a.custodiado.id = :custodiadoId")
+    List<Long> findVisitanteIdsByCustodiadoId(@Param("custodiadoId") Long custodiadoId);
+
 }

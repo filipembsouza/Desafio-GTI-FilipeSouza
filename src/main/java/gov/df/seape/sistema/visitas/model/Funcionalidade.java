@@ -1,8 +1,6 @@
 package gov.df.seape.sistema.visitas.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -40,7 +38,7 @@ public class Funcionalidade {
     private String authority;
 
     @OneToMany(mappedBy = "funcionalidade", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VincPerfilFuncionalidade> vinculos = new ArrayList<>();
+    private Set<VincPerfilFuncionalidade> vinculos = new HashSet<>();
     
     @ManyToMany(mappedBy = "funcionalidades", fetch = FetchType.LAZY)
     private Set<Perfil> perfis = new HashSet<>();

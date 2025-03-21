@@ -71,6 +71,15 @@ public interface VisitanteRepository extends JpaRepository<Visitante, Long> {
     Page<Visitante> findByNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
     
     /**
+     * Busca visitantes por uma lista de IDs.
+     * 
+     * @param ids Lista de IDs de visitantes a serem buscados
+     * @param pageable Configurações de paginação
+     * @return Página de visitantes com os IDs especificados
+     */
+    Page<Visitante> findByIdIn(List<Long> ids, Pageable pageable);
+    
+    /**
      * Busca avançada de visitantes por múltiplos critérios combinados.
      * Este método permite realizar pesquisas complexas usando diferentes filtros
      * simultaneamente. Os parâmetros são opcionais - quando null, não são aplicados.

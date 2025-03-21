@@ -77,6 +77,22 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     Page<Custodiado> findByUnidadePenal(@Param("unidadePenal") UnidadePenal unidadePenal, Pageable pageable);
     
     /**
+     * Conta o número de custodiados em uma unidade penal específica.
+     * 
+     * @param unidadePenalId ID da unidade penal
+     * @return Número de custodiados na unidade penal
+     */
+    long countByUnidadePenalId(Long unidadePenalId);
+    
+    /**
+     * Conta o número de custodiados agrupados por unidade penal.
+     * 
+     * @return Lista de arrays contendo [id da unidade, nome da unidade, quantidade]
+     */
+    @Query("SELECT c.unidadePenal.id, c.unidadePenal.nome, COUNT(c) FROM Custodiado c GROUP BY c.unidadePenal.id, c.unidadePenal.nome")
+    List<Object[]> countByUnidadePenal();
+    
+    /**
      * Busca custodiados cujo vulgo (apelido) contenha o termo especificado.
      * Esta consulta ignora maiúsculas/minúsculas para facilitar a busca.
      * Os resultados são retornados ordenados pelo nome da pessoa

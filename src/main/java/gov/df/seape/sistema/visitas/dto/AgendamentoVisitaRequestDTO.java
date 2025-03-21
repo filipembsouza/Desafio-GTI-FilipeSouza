@@ -1,6 +1,6 @@
 package gov.df.seape.sistema.visitas.dto;
 
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ public class AgendamentoVisitaRequestDTO {
     private Long visitanteId;
     
     @NotNull(message = "Data e hora do agendamento são obrigatórias")
-    @Future(message = "A data do agendamento deve ser futura")
+    @FutureOrPresent(message = "A data do agendamento deve ser presente ou futura")
     private LocalDateTime dataHoraAgendamento;
     
     // O status será definido pelo sistema na criação (AGENDADO)

@@ -4,92 +4,99 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 /**
- * Entidade que representa a tabela USUARIO no banco de dados.
- * Esta entidade armazena as informações de acesso dos usuários do sistema,
- * como credenciais de login e associações com perfis de acesso.
- * 
- * Os usuários são os atores que interagem com o sistema para gerenciar
- * os agendamentos de visitas e outras funções administrativas. Eles
- * podem ser servidores da unidade prisional como agentes, diretores,
- * ou outros operadores do sistema.
+ * Entidade que representa os usuários do sistema de visitas prisionais.
+ * Gerencia credenciais de acesso e informações de autenticação.
  */
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"senha", "perfil", "pessoa"})
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Usuario {
     
-    /**
-     * Identificador único do usuário.
-     * Gerado automaticamente pelo banco de dados.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @Column(name = "id")
     private Long id;
     
-    /**
-     * Email do usuário, utilizado como nome de usuário (login) para acesso ao sistema.
-     * Este campo é obrigatório e deve ser único para cada usuário.
-     * É através deste email que o usuário se identificará ao fazer login no sistema.
-     */
     @NotBlank(message = "O email é obrigatório")
     @Email(message = "Formato de email inválido")
+    @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     @Column(name = "email", length = 255, nullable = false, unique = true)
     private String email;
     
-    /**
-     * Senha do usuário para autenticação no sistema.
-     * Este campo é obrigatório e, por questões de segurança, deve armazenar
-     * a senha de forma criptografada, nunca em texto plano.
-     * O tamanho de 255 caracteres é adequado para armazenar hashes de senha
-     * gerados por algoritmos como BCrypt ou PBKDF2.
-     */
     @NotBlank(message = "A senha é obrigatória")
+    @Size(min = 8, message = "Senha deve ter no mínimo 8 caracteres")
     @Column(name = "senha", length = 255, nullable = false)
     private String senha;
     
-    /**
-     * Relação com a entidade Perfil.
-     * Indica qual perfil de acesso o usuário possui, determinando quais
-     * funcionalidades ele pode acessar no sistema.
-     * Esta associação é obrigatória, pois todo usuário deve ter um perfil
-     * para determinar suas permissões no sistema.
-     */
     @NotNull(message = "O perfil é obrigatório")
     @ManyToOne
     @JoinColumn(name = "id_perfil", nullable = false)
     private Perfil perfil;
     
-    /**
-     * Relação com a entidade Pessoa.
-     * Associa o usuário a uma pessoa física cadastrada no sistema.
-     * Esta associação é obrigatória, pois todo usuário no sistema
-     * representa uma pessoa real com seus dados cadastrais.
-     */
     @NotNull(message = "A pessoa é obrigatória")
     @ManyToOne
     @JoinColumn(name = "pessoa_id", nullable = false)
     private Pessoa pessoa;
-    
+
     /**
-     * Construtor com todos os campos obrigatórios.
-     * Facilita a criação de instâncias completas desta entidade.
+     * Data do último acesso do usuário.
+     * Permite rastrear atividade e sessões.
      */
-    public Usuario(String email, String senha, Perfil perfil, Pessoa pessoa) {
-        this.email = email;
-        this.senha = senha;
-        this.perfil = perfil;
-        this.pessoa = pessoa;
+    @Column(name = "ultimo_acesso")
+    private LocalDateTime ultimoAcesso;
+
+    /**
+     * Data da última alteração de senha.
+     * Útil para políticas de segurança.
+     */
+    @Column(name = "ultima_alteracao_senha")
+    private LocalDateTime ultimaAlteracaoSenha;
+
+    /**
+     * Indica se o usuário está ativo no sistema.
+     */
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = true;
+
+    /**
+     * Registra o último login do usuário.
+     * 
+     * @param dataLogin Data e hora do login
+     */
+    public void registrarLogin(LocalDateTime dataLogin) {
+        this.ultimoAcesso = dataLogin;
+    }
+
+    /**
+     * Atualiza a senha do usuário.
+     * 
+     * @param novaSenha Nova senha criptografada
+     */
+    public void atualizarSenha(String novaSenha) {
+        this.senha = novaSenha;
+        this.ultimaAlteracaoSenha = LocalDateTime.now();
+    }
+
+    /**
+     * Verifica se o usuário está inativo por muito tempo.
+     * 
+     * @param tempoMaximoInatividade Tempo máximo de inatividade em dias
+     * @return true se estiver inativo, false caso contrário
+     */
+    public boolean estaInativo(long tempoMaximoInatividade) {
+        return this.ultimoAcesso == null || 
+               LocalDateTime.now().minusDays(tempoMaximoInatividade)
+               .isAfter(this.ultimoAcesso);
     }
 }

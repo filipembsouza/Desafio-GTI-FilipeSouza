@@ -3,7 +3,6 @@ package gov.df.seape.sistema.visitas.service;
 import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.PessoaRequestDTO;
 import gov.df.seape.sistema.visitas.dto.PessoaResponseDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;

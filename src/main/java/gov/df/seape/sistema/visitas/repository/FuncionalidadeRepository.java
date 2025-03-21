@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -67,7 +68,8 @@ public interface FuncionalidadeRepository extends JpaRepository<Funcionalidade, 
      * @return Página de funcionalidades que contêm o termo na descrição
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")
-    Page<Funcionalidade> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, Pageable pageable);
+    @NonNull
+    Page<Funcionalidade> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, @NonNull Pageable pageable);
     
     /**
      * Lista todas as funcionalidades com suporte a paginação.
@@ -78,7 +80,9 @@ public interface FuncionalidadeRepository extends JpaRepository<Funcionalidade, 
      * @param pageable Objeto com informações de paginação
      * @return Página de funcionalidades
      */
-    Page<Funcionalidade> findAll(Pageable pageable);
+    @Override
+    @NonNull
+    Page<Funcionalidade> findAll(@NonNull Pageable pageable);
     
     /**
      * Lista todas as funcionalidades associadas a um determinado perfil.

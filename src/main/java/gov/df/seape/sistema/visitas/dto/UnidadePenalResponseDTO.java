@@ -16,10 +16,12 @@ public class UnidadePenalResponseDTO {
     private Integer totalCustodiados;
     
     public UnidadePenalResponseDTO(UnidadePenal unidadePenal) {
-        this.id = unidadePenal.getId();
-        this.nome = unidadePenal.getNome();
-        this.descricao = unidadePenal.getDescricao();
-        this.totalCustodiados = unidadePenal.getCustodiados() != null ? 
-                                unidadePenal.getCustodiados().size() : 0;
+        if (unidadePenal != null) {
+            this.id = unidadePenal.getId();
+            this.nome = unidadePenal.getNome();
+            this.descricao = unidadePenal.getDescricao();
+            this.totalCustodiados = unidadePenal.getCustodiados() != null ? 
+                                    unidadePenal.getCustodiados().size() : 0;
+        }
     }
 }

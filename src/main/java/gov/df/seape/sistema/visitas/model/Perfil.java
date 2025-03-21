@@ -6,7 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Entidade que representa os perfis de usuário no sistema.

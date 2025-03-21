@@ -40,15 +40,14 @@ public class PerfilServiceImpl implements PerfilService {
     @Override
     @Transactional
     public PerfilResponseDTO criarPerfil(PerfilRequestDTO requestDTO) {
-        log.info("Criando novo perfil com nome: {}", requestDTO.getNome());
-
-        // Mapeia o campo "nome" do DTO para a propriedade "descricao" do Perfil
+        log.info("Criando novo perfil: {}", requestDTO.getDescricao());
+    
         Perfil perfil = new Perfil();
-        perfil.setDescricao(requestDTO.getNome());
+        perfil.setDescricao(requestDTO.getDescricao());
         perfil = perfilRepository.save(perfil);
-
+    
         log.info("Perfil criado com sucesso. ID: {}", perfil.getId());
-        return convertToDTO(perfil);
+        return new PerfilResponseDTO(perfil);
     }
 
     /**
@@ -59,20 +58,20 @@ public class PerfilServiceImpl implements PerfilService {
      * @return O perfil atualizado
      */
     @Override
-    @Transactional
-    public PerfilResponseDTO atualizarPerfil(Long id, PerfilRequestDTO requestDTO) {
-        log.info("Atualizando perfil com ID: {}", id);
+@Transactional
+public PerfilResponseDTO atualizarPerfil(Long id, PerfilRequestDTO requestDTO) {
+    log.info("Atualizando perfil com ID: {}", id);
 
-        Perfil perfil = perfilRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + id));
+    // Usar a constante PERFIL_NAO_ENCONTRADO em vez de string literal
+    Perfil perfil = perfilRepository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + id));
 
-        perfil.setDescricao(requestDTO.getNome());
-        perfil = perfilRepository.save(perfil);
+    perfil.setDescricao(requestDTO.getDescricao());
+    perfil = perfilRepository.save(perfil);
 
-        log.info("Perfil atualizado com sucesso. ID: {}", perfil.getId());
-        return convertToDTO(perfil);
-    }
-
+    log.info("Perfil atualizado com sucesso. ID: {}", perfil.getId());
+    return convertToDTO(perfil);
+} 
     /**
      * Buscar todos os perfis com paginação.
      *
@@ -197,10 +196,7 @@ public class PerfilServiceImpl implements PerfilService {
     private PerfilResponseDTO convertToDTO(Perfil perfil) {
         PerfilResponseDTO dto = new PerfilResponseDTO();
         dto.setId(perfil.getId());
-        dto.setNome(perfil.getDescricao());
-        dto.setCpf(null);
-        dto.setDataNascimento(null);
-        dto.setIdade(null);
+        dto.setDescricao(perfil.getDescricao()); 
         return dto;
     }
 }

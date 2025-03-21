@@ -1,5 +1,7 @@
 package gov.df.seape.sistema.visitas.dto;
 
+import gov.df.seape.sistema.visitas.model.VincPerfilFuncionalidade;
+
 /**
  * DTO para resposta de vínculo entre Perfil e Funcionalidade.
  * Retorna informações detalhadas do vínculo.
@@ -55,4 +57,10 @@ public class VincPerfilFuncionalidadeResponseDTO {
     public void setFuncionalidade(FuncionalidadeResponseDTO funcionalidade) {
         this.funcionalidade = funcionalidade;
     }
+
+    public VincPerfilFuncionalidadeResponseDTO(VincPerfilFuncionalidade vinculo) {
+    this.id = vinculo.getId();
+    this.perfil = vinculo.getPerfil() != null ? new PerfilResponseDTO(vinculo.getPerfil()) : null;
+    this.funcionalidade = vinculo.getFuncionalidade() != null ? new FuncionalidadeResponseDTO(vinculo.getFuncionalidade()) : null;
+}
 }

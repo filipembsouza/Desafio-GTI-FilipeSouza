@@ -1,37 +1,30 @@
 package gov.df.seape.sistema.visitas.dto;
 
-import java.time.LocalDate;
-import java.time.Period;
-
 import gov.df.seape.sistema.visitas.model.Perfil;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class PerfilResponseDTO {
     private Long id;
-    private String nome;
-    private String cpf;
-    private LocalDate dataNascimento;
-    private Integer idade;
+    private String descricao;
+    private List<FuncionalidadeResponseDTO> funcionalidades = new ArrayList<>();
     
-    public PerfilResponseDTO(Long id, String nome, String cpf, LocalDate dataNascimento, Integer idade) {
-        this.id = id;
-        this.nome = nome;
-        this.cpf = cpf;
-        this.dataNascimento = dataNascimento;
-        this.idade = idade;
-        calcularIdade();
-    }
-    
-    public void calcularIdade() {
-        if (this.dataNascimento != null) {
-            this.idade = Period.between(this.dataNascimento, LocalDate.now()).getYears();
+    public PerfilResponseDTO(Perfil perfil) {
+        if (perfil != null) {
+            this.id = perfil.getId();
+            this.descricao = perfil.getDescricao();
         }
     }
-
-    public PerfilResponseDTO(Perfil perfil) {
-     
+    
+    public PerfilResponseDTO(Long id, String descricao) {
+        this.id = id;
+        this.descricao = descricao;
     }
 }

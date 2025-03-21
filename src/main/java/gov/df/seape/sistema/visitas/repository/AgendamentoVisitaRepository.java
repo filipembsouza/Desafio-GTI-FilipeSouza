@@ -269,7 +269,25 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
     @Query("SELECT DISTINCT a.visitante.id FROM AgendamentoVisita a WHERE a.custodiado.id = :custodiadoId")
     List<Long> findVisitanteIdsByCustodiadoId(@Param("custodiadoId") Long custodiadoId);
 
-    List<AgendamentoVisita> findByVisitanteIdAndDataHoraAgendamentoBetween(Long id, LocalDateTime minusHours,
-            LocalDateTime plusHours);
+     /**
+       * Conta agendamentos por status ID.
+       * 
+       * @param statusId ID do status
+       * @return Número de agendamentos com o status especificado
+       */
+        long countByStatusId(Long statusId);
+
+        /**
+ * Busca agendamentos de um visitante específico dentro de um intervalo de data/hora.
+ * 
+ * @param visitanteId ID do visitante
+ * @param inicio Data e hora de início do período 
+ * @param fim Data e hora de fim do período
+ * @return Lista de agendamentos encontrados
+ */
+List<AgendamentoVisita> findByVisitanteIdAndDataHoraAgendamentoBetween(
+        Long visitanteId, 
+        LocalDateTime inicio, 
+        LocalDateTime fim);
 
 }

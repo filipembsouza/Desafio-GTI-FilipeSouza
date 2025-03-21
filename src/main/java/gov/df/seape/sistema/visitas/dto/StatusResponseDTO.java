@@ -14,7 +14,9 @@ public class StatusResponseDTO {
     private String descricao;
     
     public StatusResponseDTO(Status status) {
-        this.id = status.getId();
-        this.descricao = status.getDescricao();
+        if (status != null) {
+            this.id = status.getId();
+            this.descricao = status.getDescricao();
+        }
     }
 }

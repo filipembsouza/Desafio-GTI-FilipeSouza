@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +19,7 @@ public class PageResponseDTO<T> {
     private boolean first;
     private boolean last;
     
-    public PageResponseDTO(org.springframework.data.domain.Page<T> page) {
+    public PageResponseDTO(Page<T> page) {
         this.content = page.getContent();
         this.page = page.getNumber();
         this.size = page.getSize();

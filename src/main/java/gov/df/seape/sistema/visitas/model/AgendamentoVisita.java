@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 /**
@@ -60,6 +61,10 @@ public class AgendamentoVisita {
 
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
+    
+    @Size(max = 500, message = "Observações devem ter no máximo 500 caracteres")
+    @Column(name = "observacoes", length = 500)
+    private String observacoes;
 
     @PrePersist
     protected void onCreate() {

@@ -38,67 +38,83 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AgendamentoVisitaServiceImpl implements AgendamentoVisitaService {
 
+    // Constantes para mensagens de erro
+    private static final String MSG_CUSTODIADO_NAO_ENCONTRADO = "Custodiado não encontrado com ID: ";
+    private static final String MSG_VISITANTE_NAO_ENCONTRADO = "Visitante não encontrado com ID: ";
+    private static final String MSG_AGENDAMENTO_NAO_ENCONTRADO = "Agendamento não encontrado com ID: ";
+    private static final String MSG_LIMITE_VISITANTES = "Este custodiado já atingiu o limite de 2 visitantes para este dia.";
+    private static final String MSG_CONFLITO_CUSTODIADO = "Já existe um agendamento para este custodiado próximo a este horário.";
+    private static final String MSG_CONFLITO_VISITANTE = "O visitante já possui outro agendamento próximo a este horário.";
+    private static final String MSG_HORARIO_NAO_PERMITIDO = "Horário não permitido para visitas. As visitas são permitidas de terça a domingo, das 9h às 17h.";
+    private static final String MSG_AGENDAMENTO_CANCELADO = "Agendamento já está cancelado.";
+    private static final String MSG_AGENDAMENTO_REALIZADO = "Não é possível cancelar um agendamento já realizado.";
+    
+    // Constantes para status
+    private static final String STATUS_AGENDADO = "AGENDADO";
+    private static final String STATUS_CONFIRMADO = "CONFIRMADO";
+    private static final String STATUS_REALIZADO = "REALIZADO";
+    private static final String STATUS_CANCELADO = "CANCELADO";
+
     private final AgendamentoVisitaRepository agendamentoRepository;
     private final CustodiadoRepository custodiadoRepository;
     private final VisitanteRepository visitanteRepository;
     private final StatusRepository statusRepository;
 
     @Override
-    @Transactional
-    public AgendamentoVisitaResponseDTO criarAgendamento(AgendamentoVisitaRequestDTO requestDTO) {
-        log.info("Iniciando criação de agendamento de visita");
+@Transactional
+public AgendamentoVisitaResponseDTO criarAgendamento(AgendamentoVisitaRequestDTO requestDTO) {
+    log.info("Iniciando criação de agendamento de visita");
+    
+    // Validar se o horário está dentro dos períodos permitidos
+    if (!HorarioVisitaUtil.isHorarioPermitido(requestDTO.getDataHoraAgendamento())) {
+        log.warn("Tentativa de agendamento em horário não permitido: {}", requestDTO.getDataHoraAgendamento());
+        throw new HorarioNaoPermitidoException(MSG_HORARIO_NAO_PERMITIDO);
+    }
+    
+    // Buscar entidades relacionadas
+    Custodiado custodiado = custodiadoRepository.findById(requestDTO.getCustodiadoId())
+            .orElseThrow(() -> new RecursoNaoEncontradoException(MSG_CUSTODIADO_NAO_ENCONTRADO + requestDTO.getCustodiadoId()));
+    
+    Visitante visitante = visitanteRepository.findById(requestDTO.getVisitanteId())
+            .orElseThrow(() -> new RecursoNaoEncontradoException(MSG_VISITANTE_NAO_ENCONTRADO + requestDTO.getVisitanteId()));
+    
+    Status statusAgendado = statusRepository.findByDescricaoIgnoreCase(STATUS_AGENDADO)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Status AGENDADO não encontrado"));
+    
+    // Verificar limite de visitantes por dia para o mesmo custodiado
+    LocalDate dataVisita = requestDTO.getDataHoraAgendamento().toLocalDate();
+    long visitasNoMesmoDia = agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamentoBetween(
+            custodiado.getId(), 
+            dataVisita.atStartOfDay(), 
+            dataVisita.atTime(23, 59, 59));
+    
+    if (visitasNoMesmoDia >= 2) {
+        log.warn("Limite de visitantes por dia excedido para o custodiado ID: {}", custodiado.getId());
+        throw new AgendamentoConflitanteException(MSG_LIMITE_VISITANTES);
+    }
         
-        // Validar se o horário está dentro dos períodos permitidos
-        if (!HorarioVisitaUtil.isHorarioPermitido(requestDTO.getDataHoraAgendamento())) {
-            log.warn("Tentativa de agendamento em horário não permitido: {}", requestDTO.getDataHoraAgendamento());
-            throw new HorarioNaoPermitidoException("Horário não permitido para visitas. As visitas são permitidas de terça a domingo, das 9h às 17h.");
-        }
-        
-        // Buscar entidades relacionadas
-        Custodiado custodiado = custodiadoRepository.findById(requestDTO.getCustodiadoId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Custodiado não encontrado com ID: " + requestDTO.getCustodiadoId()));
-        
-        Visitante visitante = visitanteRepository.findById(requestDTO.getVisitanteId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + requestDTO.getVisitanteId()));
-        
-        Status statusAgendado = statusRepository.findByDescricaoIgnoreCase("AGENDADO")
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Status AGENDADO não encontrado"));
-        
-        // Verificar limite de visitantes por dia para o mesmo custodiado
-        LocalDate dataVisita = requestDTO.getDataHoraAgendamento().toLocalDate();
-        long visitasNoMesmoDia = agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamentoBetween(
-                custodiado.getId(), 
-                dataVisita.atStartOfDay(), 
-                dataVisita.atTime(23, 59, 59));
-        
-        if (visitasNoMesmoDia >= 2) {
-            log.warn("Limite de visitantes por dia excedido para o custodiado ID: {}", custodiado.getId());
-            throw new AgendamentoConflitanteException("Este custodiado já atingiu o limite de 2 visitantes para este dia.");
-        }
-        
-        // Verificar se o custodiado já tem agendamento no mesmo horário
-        List<AgendamentoVisita> agendamentosConflitantes = agendamentoRepository.findAgendamentosConflitantes(
-                custodiado.getId(),
-                requestDTO.getDataHoraAgendamento().minusHours(1),
-                requestDTO.getDataHoraAgendamento().plusHours(1),
-                getStatusCanceladoId());
-        
-        if (!agendamentosConflitantes.isEmpty()) {
-            log.warn("Conflito de agendamento detectado para o custodiado ID: {}", custodiado.getId());
-            throw new AgendamentoConflitanteException("Já existe um agendamento para este custodiado próximo a este horário.");
-        }
-        
-        // Verificar se o visitante já tem agendamento no mesmo horário
-        List<AgendamentoVisita> agendamentosVisitante = agendamentoRepository.findByVisitanteIdAndDataHoraAgendamentoBetween(
-                visitante.getId(),
-                requestDTO.getDataHoraAgendamento().minusHours(1),
-                requestDTO.getDataHoraAgendamento().plusHours(1));
-        
-        if (!agendamentosVisitante.isEmpty()) {
-            log.warn("Conflito de agendamento detectado para o visitante ID: {}", visitante.getId());
-            throw new AgendamentoConflitanteException("O visitante já possui outro agendamento próximo a este horário.");
-        }
-        
+       // Verificar se o custodiado já tem agendamento no mesmo horário
+List<AgendamentoVisita> agendamentosConflitantes = agendamentoRepository.findAgendamentosConflitantes(
+    custodiado.getId(),
+    requestDTO.getDataHoraAgendamento().minusHours(1),
+    requestDTO.getDataHoraAgendamento().plusHours(1),
+    getStatusCanceladoId());
+
+if (!agendamentosConflitantes.isEmpty()) {
+log.warn("Conflito de agendamento detectado para o custodiado ID: {}", custodiado.getId());
+throw new AgendamentoConflitanteException(MSG_CONFLITO_CUSTODIADO);
+}
+
+// Verificar se o visitante já tem agendamento no mesmo horário
+List<AgendamentoVisita> agendamentosVisitante = agendamentoRepository.findByVisitanteIdAndDataHoraAgendamentoBetween(
+    visitante.getId(),
+    requestDTO.getDataHoraAgendamento().minusHours(1),
+    requestDTO.getDataHoraAgendamento().plusHours(1));
+
+if (!agendamentosVisitante.isEmpty()) {
+log.warn("Conflito de agendamento detectado para o visitante ID: {}", visitante.getId());
+throw new AgendamentoConflitanteException(MSG_CONFLITO_VISITANTE);
+}
         // Criar e salvar o agendamento
         AgendamentoVisita agendamento = new AgendamentoVisita();
         agendamento.setCustodiado(custodiado);
@@ -119,20 +135,13 @@ public class AgendamentoVisitaServiceImpl implements AgendamentoVisitaService {
         log.info("Iniciando atualização de agendamento. ID: {}", id);
         
         // Buscar o agendamento existente
-        AgendamentoVisita agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado com ID: " + id));
+        AgendamentoVisita agendamento = buscarAgendamento(id);
         
         // Verificar se o agendamento não está cancelado
-        if (agendamento.getStatus().getDescricao().equalsIgnoreCase("CANCELADO")) {
-            log.warn("Tentativa de atualizar agendamento cancelado. ID: {}", id);
-            throw new OperacaoInvalidaException("Não é possível atualizar um agendamento cancelado.");
-        }
+        verificarStatusCancelado(agendamento, id);
         
         // Validar se o horário está dentro dos períodos permitidos
-        if (!HorarioVisitaUtil.isHorarioPermitido(requestDTO.getDataHoraAgendamento())) {
-            log.warn("Tentativa de agendamento em horário não permitido: {}", requestDTO.getDataHoraAgendamento());
-            throw new HorarioNaoPermitidoException("Horário não permitido para visitas. As visitas são permitidas de terça a domingo, das 9h às 17h.");
-        }
+        validarHorarioAgendamento(requestDTO);
         
         // Verificar se há alteração no custodiado ou visitante
         boolean alterouCustodiado = !agendamento.getCustodiado().getId().equals(requestDTO.getCustodiadoId());
@@ -143,69 +152,20 @@ public class AgendamentoVisitaServiceImpl implements AgendamentoVisitaService {
         Custodiado custodiado = agendamento.getCustodiado();
         if (alterouCustodiado) {
             custodiado = custodiadoRepository.findById(requestDTO.getCustodiadoId())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Custodiado não encontrado com ID: " + requestDTO.getCustodiadoId()));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException(MSG_CUSTODIADO_NAO_ENCONTRADO + requestDTO.getCustodiadoId()));
         }
         
         Visitante visitante = agendamento.getVisitante();
         if (alterouVisitante) {
             visitante = visitanteRepository.findById(requestDTO.getVisitanteId())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + requestDTO.getVisitanteId()));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException(MSG_VISITANTE_NAO_ENCONTRADO + requestDTO.getVisitanteId()));
         }
         
-        // Verificar limite de visitantes por dia para o mesmo custodiado se houve alteração
-        if (alterouCustodiado || alterouDataHora) {
-            LocalDate dataVisita = requestDTO.getDataHoraAgendamento().toLocalDate();
-            long visitasNoMesmoDia = agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamentoBetween(
-                    custodiado.getId(), 
-                    dataVisita.atStartOfDay(), 
-                    dataVisita.atTime(23, 59, 59));
-            
-            // Não contar o agendamento atual se for o mesmo dia
-            if (agendamento.getDataHoraAgendamento().toLocalDate().equals(dataVisita)) {
-                visitasNoMesmoDia--;
-            }
-            
-            if (visitasNoMesmoDia >= 2) {
-                log.warn("Limite de visitantes por dia excedido para o custodiado ID: {}", custodiado.getId());
-                throw new AgendamentoConflitanteException("Este custodiado já atingiu o limite de 2 visitantes para este dia.");
-            }
-        }
+        // Verificar limite de visitantes por dia se necessário
+        verificarLimiteVisitantes(custodiado, requestDTO, alterouCustodiado, alterouDataHora);
         
-        // Verificar conflitos de horário com outros agendamentos se houve alteração
-        if (alterouCustodiado || alterouVisitante || alterouDataHora) {
-            // Verificar conflitos para o custodiado
-            List<AgendamentoVisita> agendamentosConflitantes = agendamentoRepository.findAgendamentosConflitantes(
-                    custodiado.getId(),
-                    requestDTO.getDataHoraAgendamento().minusHours(1),
-                    requestDTO.getDataHoraAgendamento().plusHours(1),
-                    getStatusCanceladoId());
-            
-            // Remover o agendamento atual da lista de conflitos
-            agendamentosConflitantes = agendamentosConflitantes.stream()
-                    .filter(a -> !a.getId().equals(id))
-                    .collect(Collectors.toList());
-            
-            if (!agendamentosConflitantes.isEmpty()) {
-                log.warn("Conflito de agendamento detectado para o custodiado ID: {}", custodiado.getId());
-                throw new AgendamentoConflitanteException("Já existe um agendamento para este custodiado próximo a este horário.");
-            }
-            
-            // Verificar conflitos para o visitante
-            List<AgendamentoVisita> agendamentosVisitante = agendamentoRepository.findByVisitanteIdAndDataHoraAgendamentoBetween(
-                    visitante.getId(),
-                    requestDTO.getDataHoraAgendamento().minusHours(1),
-                    requestDTO.getDataHoraAgendamento().plusHours(1));
-            
-            // Remover o agendamento atual da lista de conflitos
-            agendamentosVisitante = agendamentosVisitante.stream()
-                    .filter(a -> !a.getId().equals(id))
-                    .toList());
-            
-            if (!agendamentosVisitante.isEmpty()) {
-                log.warn("Conflito de agendamento detectado para o visitante ID: {}", visitante.getId());
-                throw new AgendamentoConflitanteException("O visitante já possui outro agendamento próximo a este horário.");
-            }
-        }
+        // Verificar conflitos de horário se necessário
+        verificarConflitosHorario(custodiado, visitante, requestDTO, alterouCustodiado, alterouVisitante, alterouDataHora, id);
         
         // Atualizar o agendamento
         agendamento.setCustodiado(custodiado);
@@ -228,6 +188,84 @@ public class AgendamentoVisitaServiceImpl implements AgendamentoVisitaService {
         log.info("Agendamento de visita atualizado com sucesso. ID: {}", agendamento.getId());
         
         return new AgendamentoVisitaResponseDTO(agendamento);
+    }
+    
+    private AgendamentoVisita buscarAgendamento(Long id) {
+        return agendamentoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(MSG_AGENDAMENTO_NAO_ENCONTRADO + id));
+    }
+    
+    private void verificarStatusCancelado(AgendamentoVisita agendamento, Long id) {
+        if (agendamento.getStatus().getDescricao().equalsIgnoreCase(STATUS_CANCELADO)) {
+            log.warn("Tentativa de atualizar agendamento cancelado. ID: {}", id);
+            throw new OperacaoInvalidaException("Não é possível atualizar um agendamento cancelado.");
+        }
+    }
+    
+    private void validarHorarioAgendamento(AgendamentoVisitaRequestDTO requestDTO) {
+        if (!HorarioVisitaUtil.isHorarioPermitido(requestDTO.getDataHoraAgendamento())) {
+            log.warn("Tentativa de agendamento em horário não permitido: {}", requestDTO.getDataHoraAgendamento());
+            throw new HorarioNaoPermitidoException(MSG_HORARIO_NAO_PERMITIDO);
+        }
+    }
+    
+    private void verificarLimiteVisitantes(Custodiado custodiado, AgendamentoVisitaRequestDTO requestDTO, 
+                                          boolean alterouCustodiado, boolean alterouDataHora) {
+        if (alterouCustodiado || alterouDataHora) {
+            LocalDate dataVisita = requestDTO.getDataHoraAgendamento().toLocalDate();
+            long visitasNoMesmoDia = agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamentoBetween(
+                    custodiado.getId(), 
+                    dataVisita.atStartOfDay(), 
+                    dataVisita.atTime(23, 59, 59));
+            
+            // Não contar o agendamento atual se for o mesmo dia
+            if (alterouDataHora && !alterouCustodiado) {
+                visitasNoMesmoDia--;
+            }
+            
+            if (visitasNoMesmoDia >= 2) {
+                log.warn("Limite de visitantes por dia excedido para o custodiado ID: {}", custodiado.getId());
+                throw new AgendamentoConflitanteException(MSG_LIMITE_VISITANTES);
+            }
+        }
+    }
+    
+    private void verificarConflitosHorario(Custodiado custodiado, Visitante visitante, AgendamentoVisitaRequestDTO requestDTO,
+                                          boolean alterouCustodiado, boolean alterouVisitante, boolean alterouDataHora, Long id) {
+        if (alterouCustodiado || alterouVisitante || alterouDataHora) {
+            // Verificar conflitos para o custodiado
+            List<AgendamentoVisita> agendamentosConflitantes = agendamentoRepository.findAgendamentosConflitantes(
+                    custodiado.getId(),
+                    requestDTO.getDataHoraAgendamento().minusHours(1),
+                    requestDTO.getDataHoraAgendamento().plusHours(1),
+                    getStatusCanceladoId());
+            
+            // Remover o agendamento atual da lista de conflitos
+            agendamentosConflitantes = agendamentosConflitantes.stream()
+                    .filter(a -> !a.getId().equals(id))
+                    .toList();
+            
+            if (!agendamentosConflitantes.isEmpty()) {
+                log.warn("Conflito de agendamento detectado para o custodiado ID: {}", custodiado.getId());
+                throw new AgendamentoConflitanteException(MSG_CONFLITO_CUSTODIADO);
+            }
+            
+            // Verificar conflitos para o visitante
+            List<AgendamentoVisita> agendamentosVisitante = agendamentoRepository.findByVisitanteIdAndDataHoraAgendamentoBetween(
+                    visitante.getId(),
+                    requestDTO.getDataHoraAgendamento().minusHours(1),
+                    requestDTO.getDataHoraAgendamento().plusHours(1));
+            
+            // Remover o agendamento atual da lista de conflitos
+            agendamentosVisitante = agendamentosVisitante.stream()
+                    .filter(a -> !a.getId().equals(id))
+                    .toList();
+            
+            if (!agendamentosVisitante.isEmpty()) {
+                log.warn("Conflito de agendamento detectado para o visitante ID: {}", visitante.getId());
+                throw new AgendamentoConflitanteException(MSG_CONFLITO_VISITANTE);
+            }
+        }
     }
 
     @Override

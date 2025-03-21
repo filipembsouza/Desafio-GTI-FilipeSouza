@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -56,7 +57,8 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
      * @return Página de perfis que contêm o termo na descrição
      */
     @Query("SELECT p FROM Perfil p WHERE LOWER(p.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")
-    Page<Perfil> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, Pageable pageable);
+    @NonNull
+    Page<Perfil> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, @NonNull Pageable pageable);
     
     /**
      * Lista todos os perfis com suporte a paginação.
@@ -65,7 +67,9 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
      * @param pageable Objeto com informações de paginação
      * @return Página de perfis
      */
-    Page<Perfil> findAll(Pageable pageable);
+    @Override
+    @NonNull
+    Page<Perfil> findAll(@NonNull Pageable pageable);
     
     /**
      * Lista perfis que possuem uma determinada funcionalidade associada.

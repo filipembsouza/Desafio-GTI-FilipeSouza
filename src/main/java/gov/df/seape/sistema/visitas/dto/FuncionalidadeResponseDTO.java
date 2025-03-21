@@ -15,8 +15,10 @@ public class FuncionalidadeResponseDTO {
     private String authority;
     
     public FuncionalidadeResponseDTO(Funcionalidade funcionalidade) {
-        this.id = funcionalidade.getId();
-        this.descricao = funcionalidade.getDescricao();
-        this.authority = funcionalidade.getAuthority();
+        if (funcionalidade != null) {
+            this.id = funcionalidade.getId();
+            this.descricao = funcionalidade.getDescricao();
+            this.authority = funcionalidade.getAuthority();
+        }
     }
 }

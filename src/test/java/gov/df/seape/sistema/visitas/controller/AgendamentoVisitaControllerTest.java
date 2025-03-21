@@ -342,4 +342,31 @@ class AgendamentoVisitaControllerTest {
 
         verify(agendamentoVisitaService).cancelarAgendamento(99L);
     }
+
+    @Test
+@WithMockUser(roles = "USER")
+@DisplayName("Deve validar campos obrigatórios na criação")
+void validarCamposObrigatorios() throws Exception {
+    // Criar DTO com campos faltando
+    AgendamentoVisitaRequestDTO invalidDTO = new AgendamentoVisitaRequestDTO();
+    
+    // Importante: defina a data válida aqui se ela não for acessível do escopo da classe
+    LocalDateTime dataHoraValida = LocalDateTime.of(
+        LocalDate.now().with(DayOfWeek.WEDNESDAY), 
+        LocalTime.of(10, 0)
+    );
+    
+    // Não informar custodiado, apenas visitante
+    invalidDTO.setVisitanteId(1L);
+    invalidDTO.setDataHoraAgendamento(dataHoraValida);
+    
+    mockMvc.perform(post("/api/agendamentos")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidDTO)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.custodiadoId").exists());
+    
+    // Não deve chamar o serviço se a validação falhar
+    verify(agendamentoVisitaService, never()).criarAgendamento(any());
+}
 }

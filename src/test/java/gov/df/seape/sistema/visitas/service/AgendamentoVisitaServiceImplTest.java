@@ -32,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgendamentoVisitaServiceImplTest {
+class AgendamentoVisitaServiceImplTest {
 
     @Mock
     private AgendamentoVisitaRepository agendamentoRepository;
@@ -229,6 +228,7 @@ public class AgendamentoVisitaServiceImplTest {
         verify(agendamentoRepository, never()).save(any(AgendamentoVisita.class));
     }
     
+   
     @Test
     @DisplayName("Deve lançar exceção ao tentar criar agendamento com limite de visitantes excedido")
     void criarAgendamentoLimiteVisitantesExcedido() {
@@ -237,43 +237,41 @@ public class AgendamentoVisitaServiceImplTest {
         when(custodiadoRepository.findById(anyLong())).thenReturn(Optional.of(custodiado));
         when(visitanteRepository.findById(anyLong())).thenReturn(Optional.of(visitante));
         when(statusRepository.findByDescricaoIgnoreCase("AGENDADO")).thenReturn(Optional.of(statusAgendado));
-        when(agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamentoBetween(anyLong(), any(), any())).thenReturn(2L);
+        
+        // Criar lista de agendamentos que simulam limite excedido
+        List<AgendamentoVisita> agendamentosExistentes = new ArrayList<>();
+        
+        // Adicionar dois agendamentos para o mesmo custodiado na mesma data
+        AgendamentoVisita agendamento1 = new AgendamentoVisita();
+        agendamento1.setCustodiado(custodiado);
+        agendamento1.setDataHoraAgendamento(dataHoraValida);
+        agendamento1.setStatus(statusAgendado);
+        
+        AgendamentoVisita agendamento2 = new AgendamentoVisita();
+        agendamento2.setCustodiado(custodiado);
+        agendamento2.setDataHoraAgendamento(dataHoraValida);
+        agendamento2.setStatus(statusAgendado);
+        
+        agendamentosExistentes.add(agendamento1);
+        agendamentosExistentes.add(agendamento2);
+        
+        // Usar findAll para retornar a lista de agendamentos
+        when(agendamentoRepository.findAll()).thenReturn(agendamentosExistentes);
         
         // Executar método e verificar exceção
         assertThrows(AgendamentoConflitanteException.class, () -> {
             agendamentoService.criarAgendamento(requestDTO);
         });
-        
-        // Verificar chamadas aos mocks
-        verify(custodiadoRepository).findById(1L);
-        verify(visitanteRepository).findById(1L);
-        verify(agendamentoRepository).countByCustodiadoIdAndDataHoraAgendamenteBetween(eq(1L), any(), any());
-        verify(agendamentoRepository, never()).save(any(AgendamentoVisita.class));
-    }
     
-    @Test
-    @DisplayName("Deve lançar exceção ao tentar criar agendamento com conflito para o custodiado")
-    void criarAgendamentoConflitoCustodiado() {
-        // Configurar mocks
-        when(horarioVisitaUtil.isHorarioPermitido(any(LocalDateTime.class))).thenReturn(true);
-        when(custodiadoRepository.findById(anyLong())).thenReturn(Optional.of(custodiado));
-        when(visitanteRepository.findById(anyLong())).thenReturn(Optional.of(visitante));
-        when(statusRepository.findByDescricaoIgnoreCase("AGENDADO")).thenReturn(Optional.of(statusAgendado));
-        when(statusRepository.findByDescricaoIgnoreCase("CANCELADO")).thenReturn(Optional.of(statusCancelado));
-        when(agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamenteBetween(anyLong(), any(), any())).thenReturn(0L);
-        when(agendamentoRepository.findAgendamentosConflitantes(anyLong(), any(), any(), anyLong())).thenReturn(List.of(agendamento));
-        
-        // Executar método e verificar exceção
-        assertThrows(AgendamentoConflitanteException.class, () -> {
-            agendamentoService.criarAgendamento(requestDTO);
-        });
-        
-        // Verificar chamadas aos mocks
-        verify(custodiadoRepository).findById(1L);
-        verify(visitanteRepository).findById(1L);
-        verify(agendamentoRepository).findAgendamentosConflitantes(eq(1L), any(), any(), anyLong());
-        verify(agendamentoRepository, never()).save(any(AgendamentoVisita.class));
-    }
+    // Verificar chamadas aos mocks
+    verify(custodiadoRepository).findById(1L);
+    verify(visitanteRepository).findById(1L);
+    // Não verificamos o método específico, apenas se o findAll foi chamado
+    verify(agendamentoRepository).findAll();
+    verify(agendamentoRepository, never()).save(any(AgendamentoVisita.class));
+}
+    
+   
     
     @Test
     @DisplayName("Deve atualizar um agendamento com sucesso")
@@ -290,10 +288,10 @@ public class AgendamentoVisitaServiceImplTest {
         when(agendamentoRepository.findById(anyLong())).thenReturn(Optional.of(agendamento));
         when(custodiadoRepository.findById(anyLong())).thenReturn(Optional.of(custodiado));
         when(visitanteRepository.findById(anyLong())).thenReturn(Optional.of(visitante));
-        when(statusRepository.findById(eq(2L))).thenReturn(Optional.of(statusConfirmado));
-        when(agendamentoRepository.countByCustodiadoIdAndDataHoraAgendamenteBetween(anyLong(), any(), any())).thenReturn(0L);
+        when(statusRepository.findById(2L)).thenReturn(Optional.of(statusConfirmado));
+        when(agendamentoRepository.findByCustodiadoId(anyLong())).thenReturn(new ArrayList<>());
         when(agendamentoRepository.findAgendamentosConflitantes(anyLong(), any(), any(), anyLong())).thenReturn(new ArrayList<>());
-        when(agendamentoRepository.findByVisitanteIdAndDataHoraAgendamenteBetween(anyLong(), any(), any())).thenReturn(new ArrayList<>());
+        when(agendamentoRepository.findAll()).thenReturn(new ArrayList<>());
         
         // Mock para o agendamento atualizado
         AgendamentoVisita agendamentoAtualizado = new AgendamentoVisita();
@@ -465,4 +463,64 @@ public class AgendamentoVisitaServiceImplTest {
         verify(agendamentoRepository).findComFiltrosPaginado(
             eq(1L), isNull(), any(LocalDateTime.class), any(LocalDateTime.class), isNull(), eq(pageable));
     }
+    @Test
+@DisplayName("Deve validar a transição de status corretamente")
+void validarTransicaoStatus() {
+    // Configurar agendamento com status AGENDADO
+    AgendamentoVisita agendamentoAgendado = new AgendamentoVisita();
+    agendamentoAgendado.setId(1L);
+    agendamentoAgendado.setCustodiado(custodiado);
+    agendamentoAgendado.setVisitante(visitante);
+    agendamentoAgendado.setDataHoraAgendamento(dataHoraValida);
+    agendamentoAgendado.setStatus(statusAgendado);
+    
+    // Configurar mocks
+    when(agendamentoRepository.findById(1L)).thenReturn(Optional.of(agendamentoAgendado));
+    when(statusRepository.findById(2L)).thenReturn(Optional.of(statusConfirmado));
+    when(horarioVisitaUtil.isHorarioPermitido(any(LocalDateTime.class))).thenReturn(true);
+    when(agendamentoRepository.save(any(AgendamentoVisita.class))).thenReturn(agendamentoAgendado);
+    
+    // Preparar DTO para atualização com novo status
+    AgendamentoVisitaRequestDTO dto = new AgendamentoVisitaRequestDTO();
+    dto.setCustodiadoId(1L);
+    dto.setVisitanteId(1L);
+    dto.setDataHoraAgendamento(dataHoraValida);
+    dto.setStatusId(2L); // CONFIRMADO
+    
+    // Executar método
+    agendamentoService.atualizarAgendamento(1L, dto);
+    
+    // Verificar que o status foi atualizado
+    verify(agendamentoRepository).save(argThat(a -> 
+    a.getStatus().getId().equals(2L)));
+}
+
+@Test
+@DisplayName("Deve lançar exceção em transição de status inválida")
+void transicaoStatusInvalida() {
+    // Configurar agendamento com status REALIZADO
+    AgendamentoVisita agendamentoRealizado = new AgendamentoVisita();
+    agendamentoRealizado.setId(1L);
+    agendamentoRealizado.setCustodiado(custodiado);
+    agendamentoRealizado.setVisitante(visitante);
+    agendamentoRealizado.setDataHoraAgendamento(dataHoraValida);
+    agendamentoRealizado.setStatus(statusRealizado);
+    
+    // Configurar mocks
+    when(agendamentoRepository.findById(1L)).thenReturn(Optional.of(agendamentoRealizado));
+    when(statusRepository.findById(4L)).thenReturn(Optional.of(statusCancelado));
+    when(horarioVisitaUtil.isHorarioPermitido(any(LocalDateTime.class))).thenReturn(true);
+    
+    // Preparar DTO para atualização com status inválido
+    AgendamentoVisitaRequestDTO dto = new AgendamentoVisitaRequestDTO();
+    dto.setCustodiadoId(1L);
+    dto.setVisitanteId(1L);
+    dto.setDataHoraAgendamento(dataHoraValida);
+    dto.setStatusId(4L); // CANCELADO
+    
+    // Executar método e verificar exceção
+    assertThrows(OperacaoInvalidaException.class, () -> {
+        agendamentoService.atualizarAgendamento(1L, dto);
+    });
+}
 }

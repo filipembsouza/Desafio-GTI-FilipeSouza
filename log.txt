@@ -15,7 +15,7 @@
 [INFO] Nothing to compile - all classes are up to date
 [INFO] 
 [INFO] --- resources:3.3.1:testResources (default-testResources) @ sistema-visitas ---
-[INFO] skip non existing resourceDirectory C:\Users\filip\OneDrive\Área de Trabalho\Desafio_GTI\sistema-visitas\src\test\resources
+[INFO] skip non existing resourceDirectory C:\Users\filip\OneDrive\ï¿½rea de Trabalho\Desafio_GTI\sistema-visitas\src\test\resources
 [INFO] 
 [INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ sistema-visitas ---
 [INFO] Nothing to compile - all classes are up to date

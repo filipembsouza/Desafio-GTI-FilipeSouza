@@ -51,12 +51,12 @@ class AgendamentoVisitaIntegrationTest {  // Removido "public"
 
     @Autowired
     private CustodiadoRepository custodiadoRepository;
+   
+    @Autowired
+    private AgendamentoVisitaRepository agendamentoVisitaRepository;
 
     @Autowired
     private StatusRepository statusRepository;
-
-    @Autowired
-    private AgendamentoVisitaRepository agendamentoVisitaRepository;
 
     private Pessoa pessoaCustodiado;
     private Pessoa pessoaVisitante;
@@ -134,4 +134,44 @@ class AgendamentoVisitaIntegrationTest {  // Removido "public"
 
         assertTrue(agendamentoVisitaRepository.findById(agendamentoId).isPresent());
     }
+    @Test
+@DisplayName("Deve atualizar o status de um agendamento existente")
+void atualizarStatusAgendamento() throws Exception {
+    // Primeiro criar um agendamento
+    MvcResult postResult = mockMvc.perform(post("/api/agendamentos")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requestDTO))
+            .header("Authorization", "Bearer token"))
+            .andExpect(status().isCreated())
+            .andReturn();
+    
+    String postResponseString = postResult.getResponse().getContentAsString();
+    AgendamentoVisitaResponseDTO createdAgendamento = objectMapper.readValue(postResponseString, AgendamentoVisitaResponseDTO.class);
+    Long agendamentoId = createdAgendamento.getId();
+    
+    // Obter o ID do status CONFIRMADO
+    Status statusConfirmado = statusRepository.findByDescricaoIgnoreCase("CONFIRMADO")
+            .orElseThrow(() -> new RuntimeException("Status CONFIRMADO não encontrado"));
+    
+    // Preparar DTO para atualização
+    AgendamentoVisitaRequestDTO updateDTO = new AgendamentoVisitaRequestDTO();
+    updateDTO.setCustodiadoId(custodiado.getId());
+    updateDTO.setVisitanteId(visitante.getId());
+    updateDTO.setDataHoraAgendamento(dataHoraValida);
+    updateDTO.setStatusId(statusConfirmado.getId());
+    
+    // Executar a atualização
+    mockMvc.perform(put("/api/agendamentos/" + agendamentoId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateDTO))
+            .header("Authorization", "Bearer token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.descricaoStatus", is("CONFIRMADO")));
+    
+    // Verificar se a atualização foi salva no banco
+    AgendamentoVisita agendamentoAtualizado = agendamentoVisitaRepository.findById(agendamentoId)
+            .orElseThrow(() -> new RuntimeException("Agendamento não encontrado após atualização"));
+    
+    assertEquals(statusConfirmado.getId(), agendamentoAtualizado.getStatus().getId());
+}
 }

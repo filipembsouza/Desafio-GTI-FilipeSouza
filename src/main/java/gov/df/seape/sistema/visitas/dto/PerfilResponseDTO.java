@@ -1,58 +1,32 @@
 package gov.df.seape.sistema.visitas.dto;
 
+import gov.df.seape.sistema.visitas.model.Perfil;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * DTO para transferência de dados de perfil na resposta da API.
- * Expõe informações básicas do perfil e suas funcionalidades.
- */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PerfilResponseDTO {
-    /**
-     * Identificador único do perfil.
-     */
+    
     private Long id;
-
-    /**
-     * Descrição do perfil.
-     */
     private String descricao;
-
-    /**
-     * Lista de funcionalidades associadas ao perfil.
-     */
     private List<FuncionalidadeResponseDTO> funcionalidades;
-
-    // Construtores
-    public PerfilResponseDTO() {}
-
-    public PerfilResponseDTO(Long id, String descricao, List<FuncionalidadeResponseDTO> funcionalidades) {
-        this.id = id;
-        this.descricao = descricao;
-        this.funcionalidades = funcionalidades;
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public List<FuncionalidadeResponseDTO> getFuncionalidades() {
-        return funcionalidades;
-    }
-
-    public void setFuncionalidades(List<FuncionalidadeResponseDTO> funcionalidades) {
-        this.funcionalidades = funcionalidades;
+    
+    public PerfilResponseDTO(Perfil perfil) {
+        this.id = perfil.getId();
+        this.descricao = perfil.getDescricao();
+        
+        if (perfil.getFuncionalidades() != null) {
+            this.funcionalidades = perfil.getFuncionalidades().stream()
+                .map(FuncionalidadeResponseDTO::new)
+                .collect(Collectors.toList());
+        } else {
+            this.funcionalidades = new ArrayList<>();
+        }
     }
 }

@@ -3,35 +3,17 @@ package gov.df.seape.sistema.visitas.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * DTO para recebimento de dados de status no momento de criação ou atualização.
- * Contém validações para garantir a integridade dos dados de entrada.
- */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StatusRequestDTO {
-    /**
-     * Descrição do status.
-     * Deve conter apenas letras maiúsculas, números e underscores.
-     * Limitado a 45 caracteres.
-     */
-    @NotBlank(message = "Descrição do status é obrigatória")
-    @Pattern(regexp = "^[A-Z0-9_]+$", message = "Descrição deve conter apenas letras maiúsculas, números e underscores")
-    @Size(max = 45, message = "Descrição deve ter no máximo 45 caracteres")
+    
+    @NotBlank(message = "A descrição do status é obrigatória")
+    @Size(max = 45, message = "A descrição do status deve ter no máximo 45 caracteres")
+    @Pattern(regexp = "^[A-Z0-9_]+$", message = "A descrição deve conter apenas letras maiúsculas, números e underscores")
     private String descricao;
-
-    // Construtores
-    public StatusRequestDTO() {}
-
-    public StatusRequestDTO(String descricao) {
-        this.descricao = descricao;
-    }
-
-    // Getters e Setters
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
 }

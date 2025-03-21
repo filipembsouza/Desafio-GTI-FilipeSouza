@@ -1,79 +1,79 @@
 package gov.df.seape.sistema.visitas.service;
 
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.VincPerfilFuncionalidadeRequestDTO;
 import gov.df.seape.sistema.visitas.dto.VincPerfilFuncionalidadeResponseDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Interface de serviço para gerenciamento de vínculos entre Perfil e Funcionalidade.
- * Define operações para manipulação dos relacionamentos de permissões.
+ * Interface de serviço para operações relacionadas a Vínculos entre Perfis e Funcionalidades.
  */
 public interface VincPerfilFuncionalidadeService {
     
     /**
-     * Cria um novo vínculo entre Perfil e Funcionalidade.
+     * Criar um novo vínculo entre perfil e funcionalidade.
      * 
-     * @param vinculoRequestDTO Dados para criação do vínculo
-     * @return Vínculo criado
+     * @param requestDTO Dados do vínculo a ser criado
+     * @return O vínculo criado, com ID gerado
      */
-    VincPerfilFuncionalidadeResponseDTO criarVinculo(VincPerfilFuncionalidadeRequestDTO vinculoRequestDTO);
+    VincPerfilFuncionalidadeResponseDTO criarVinculo(VincPerfilFuncionalidadeRequestDTO requestDTO);
     
     /**
-     * Busca um vínculo pelo seu identificador.
+     * Excluir um vínculo existente.
      * 
-     * @param id Identificador do vínculo
-     * @return Optional com o vínculo encontrado
-     */
-    Optional<VincPerfilFuncionalidadeResponseDTO> buscarVinculoPorId(Long id);
-    
-    /**
-     * Lista todos os vínculos cadastrados.
-     * 
-     * @return Lista de todos os vínculos
-     */
-    List<VincPerfilFuncionalidadeResponseDTO> listarTodosVinculos();
-    
-    /**
-     * Lista vínculos com suporte a paginação.
-     * 
-     * @param pageable Configurações de paginação
-     * @return Página de vínculos
-     */
-    Page<VincPerfilFuncionalidadeResponseDTO> listarVinculosPaginado(Pageable pageable);
-    
-    /**
-     * Remove um vínculo pelo seu identificador.
-     * 
-     * @param id Identificador do vínculo a ser removido
+     * @param id ID do vínculo a ser excluído
      */
     void excluirVinculo(Long id);
     
     /**
-     * Lista vínculos por perfil.
+     * Buscar todos os vínculos com paginação.
      * 
-     * @param perfilId ID do perfil
-     * @return Lista de vínculos do perfil
+     * @param pageable Configurações de paginação
+     * @return Página de vínculos
      */
-    List<VincPerfilFuncionalidadeResponseDTO> listarVinculosPorPerfil(Long perfilId);
+    PageResponseDTO<VincPerfilFuncionalidadeResponseDTO> listarVinculosPaginados(Pageable pageable);
     
     /**
-     * Lista vínculos por funcionalidade.
+     * Buscar todos os vínculos.
      * 
-     * @param funcionalidadeId ID da funcionalidade
-     * @return Lista de vínculos da funcionalidade
+     * @return Lista de todos os vínculos
      */
-    List<VincPerfilFuncionalidadeResponseDTO> listarVinculosPorFuncionalidade(Long funcionalidadeId);
+    List<VincPerfilFuncionalidadeResponseDTO> listarVinculos();
     
     /**
-     * Verifica se existe um vínculo entre perfil e funcionalidade.
+     * Buscar um vínculo específico pelo ID.
+     * 
+     * @param id ID do vínculo a ser buscado
+     * @return O vínculo encontrado
+     */
+    VincPerfilFuncionalidadeResponseDTO buscarVinculoPorId(Long id);
+    
+    /**
+     * Buscar vínculos por perfil.
+     * 
+     * @param perfilId ID do perfil
+     * @param pageable Configurações de paginação
+     * @return Página de vínculos do perfil
+     */
+    PageResponseDTO<VincPerfilFuncionalidadeResponseDTO> buscarPorPerfil(Long perfilId, Pageable pageable);
+    
+    /**
+     * Buscar vínculos por funcionalidade.
+     * 
+     * @param funcionalidadeId ID da funcionalidade
+     * @param pageable Configurações de paginação
+     * @return Página de vínculos da funcionalidade
+     */
+    PageResponseDTO<VincPerfilFuncionalidadeResponseDTO> buscarPorFuncionalidade(Long funcionalidadeId, Pageable pageable);
+    
+    /**
+     * Verificar se um perfil possui uma determinada funcionalidade.
      * 
      * @param perfilId ID do perfil
      * @param funcionalidadeId ID da funcionalidade
-     * @return true se o vínculo existir, false caso contrário
+     * @return true se o perfil possui a funcionalidade, false caso contrário
      */
-    boolean existeVinculo(Long perfilId, Long funcionalidadeId);
+    boolean verificarVinculo(Long perfilId, Long funcionalidadeId);
 }

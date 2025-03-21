@@ -2,86 +2,87 @@ package gov.df.seape.sistema.visitas.service;
 
 import gov.df.seape.sistema.visitas.dto.FuncionalidadeRequestDTO;
 import gov.df.seape.sistema.visitas.dto.FuncionalidadeResponseDTO;
-import org.springframework.data.domain.Page;
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Interface de serviço para gerenciamento de Funcionalidades.
- * Define operações para manipulação de funcionalidades no sistema.
+ * Interface de serviço para operações relacionadas a Funcionalidades.
  */
 public interface FuncionalidadeService {
     
     /**
-     * Cria uma nova funcionalidade.
+     * Criar uma nova funcionalidade.
      * 
-     * @param funcionalidadeRequestDTO Dados para criação da funcionalidade
-     * @return Funcionalidade criada
+     * @param requestDTO Dados da funcionalidade a ser criada
+     * @return A funcionalidade criada, com ID gerado
      */
-    FuncionalidadeResponseDTO criarFuncionalidade(FuncionalidadeRequestDTO funcionalidadeRequestDTO);
+    FuncionalidadeResponseDTO criarFuncionalidade(FuncionalidadeRequestDTO requestDTO);
     
     /**
-     * Atualiza uma funcionalidade existente.
+     * Atualizar uma funcionalidade existente.
      * 
-     * @param id Identificador da funcionalidade
-     * @param funcionalidadeRequestDTO Novos dados da funcionalidade
-     * @return Funcionalidade atualizada
+     * @param id ID da funcionalidade a ser atualizada
+     * @param requestDTO Novos dados da funcionalidade
+     * @return A funcionalidade atualizada
      */
-    FuncionalidadeResponseDTO atualizarFuncionalidade(Long id, FuncionalidadeRequestDTO funcionalidadeRequestDTO);
+    FuncionalidadeResponseDTO atualizarFuncionalidade(Long id, FuncionalidadeRequestDTO requestDTO);
     
     /**
-     * Busca uma funcionalidade pelo seu identificador.
-     * 
-     * @param id Identificador da funcionalidade
-     * @return Optional com a funcionalidade encontrada
-     */
-    Optional<FuncionalidadeResponseDTO> buscarFuncionalidadePorId(Long id);
-    
-    /**
-     * Busca uma funcionalidade pela sua descrição.
-     * 
-     * @param descricao Descrição da funcionalidade
-     * @return Optional com a funcionalidade encontrada
-     */
-    Optional<FuncionalidadeResponseDTO> buscarFuncionalidadePorDescricao(String descricao);
-    
-    /**
-     * Busca uma funcionalidade por sua authority.
-     * 
-     * @param authority Identificador técnico da funcionalidade
-     * @return Optional com a funcionalidade encontrada
-     */
-    Optional<FuncionalidadeResponseDTO> buscarFuncionalidadePorAuthority(String authority);
-    
-    /**
-     * Lista todas as funcionalidades cadastradas.
-     * 
-     * @return Lista de todas as funcionalidades
-     */
-    List<FuncionalidadeResponseDTO> listarTodasFuncionalidades();
-    
-    /**
-     * Lista funcionalidades com suporte a paginação.
+     * Buscar todas as funcionalidades com paginação.
      * 
      * @param pageable Configurações de paginação
      * @return Página de funcionalidades
      */
-    Page<FuncionalidadeResponseDTO> listarFuncionalidadesPaginado(Pageable pageable);
+    PageResponseDTO<FuncionalidadeResponseDTO> listarFuncionalidadesPaginadas(Pageable pageable);
     
     /**
-     * Remove uma funcionalidade pelo seu identificador.
+     * Buscar todas as funcionalidades.
      * 
-     * @param id Identificador da funcionalidade a ser removida
+     * @return Lista de todas as funcionalidades
      */
-    void excluirFuncionalidade(Long id);
+    List<FuncionalidadeResponseDTO> listarFuncionalidades();
     
     /**
-     * Busca funcionalidades por descrição.
+     * Buscar uma funcionalidade específica pelo ID.
      * 
-     * @param descricao Termo de busca na descrição
-     * @return Lista de funcionalidades correspondentes
+     * @param id ID da funcionalidade a ser buscada
+     * @return A funcionalidade encontrada
      */
-    List<FuncionalidadeResponseDTO> buscarFuncionalidadePorDescricaoContendo(String descricao);
+    FuncionalidadeResponseDTO buscarFuncionalidadePorId(Long id);
+    
+    /**
+     * Buscar funcionalidades por descrição.
+     * 
+     * @param descricao Descrição ou parte da descrição
+     * @param pageable Configurações de paginação
+     * @return Página de funcionalidades que contêm a descrição especificada
+     */
+    PageResponseDTO<FuncionalidadeResponseDTO> buscarPorDescricao(String descricao, Pageable pageable);
+    
+    /**
+     * Buscar funcionalidades por authority.
+     * 
+     * @param authority Authority ou parte da authority
+     * @param pageable Configurações de paginação
+     * @return Página de funcionalidades que contêm a authority especificada
+     */
+    PageResponseDTO<FuncionalidadeResponseDTO> buscarPorAuthority(String authority, Pageable pageable);
+    
+    /**
+     * Buscar funcionalidades por perfil.
+     * 
+     * @param perfilId ID do perfil
+     * @return Lista de funcionalidades associadas ao perfil
+     */
+    List<FuncionalidadeResponseDTO> buscarPorPerfil(Long perfilId);
+    
+    /**
+     * Buscar funcionalidades não associadas a um perfil.
+     * 
+     * @param perfilId ID do perfil
+     * @return Lista de funcionalidades não associadas ao perfil
+     */
+    List<FuncionalidadeResponseDTO> buscarNaoAssociadasAoPerfil(Long perfilId);
 }

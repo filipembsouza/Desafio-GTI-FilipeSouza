@@ -1,56 +1,25 @@
 package gov.df.seape.sistema.visitas.dto;
 
-/**
- * DTO para transferência de dados de unidade penal na resposta da API.
- * Expõe informações básicas da unidade penal.
- */
+import gov.df.seape.sistema.visitas.model.UnidadePenal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UnidadePenalResponseDTO {
-    /**
-     * Identificador único da unidade penal.
-     */
+    
     private Long id;
-
-    /**
-     * Nome da unidade penal.
-     */
     private String nome;
-
-    /**
-     * Descrição adicional da unidade penal.
-     */
     private String descricao;
-
-    // Construtores
-    public UnidadePenalResponseDTO() {}
-
-    public UnidadePenalResponseDTO(Long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    private Integer totalCustodiados;
+    
+    public UnidadePenalResponseDTO(UnidadePenal unidadePenal) {
+        this.id = unidadePenal.getId();
+        this.nome = unidadePenal.getNome();
+        this.descricao = unidadePenal.getDescricao();
+        this.totalCustodiados = unidadePenal.getCustodiados() != null ? 
+                                unidadePenal.getCustodiados().size() : 0;
     }
 }

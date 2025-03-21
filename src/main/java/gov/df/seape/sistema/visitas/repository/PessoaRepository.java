@@ -14,58 +14,67 @@ import java.util.Optional;
 
 /**
  * Repositório para a entidade Pessoa.
- * Fornece métodos para realizar operações de banco de dados relacionadas a Pessoas.
  */
 @Repository
 public interface PessoaRepository extends JpaRepository<Pessoa, Long> {
     
     /**
-     * Verifica se existe uma pessoa com o CPF fornecido.
+     * Verifica se existe uma pessoa com o CPF informado.
      * 
-     * @param cpf O CPF a ser verificado
-     * @return true se existir uma pessoa com o CPF informado, false caso contrário
+     * @param cpf CPF a ser verificado
+     * @return true se existir, false caso contrário
      */
     boolean existsByCpf(String cpf);
     
     /**
      * Busca uma pessoa pelo CPF.
      * 
-     * @param cpf O CPF a ser buscado
-     * @return A pessoa encontrada, ou vazia se não existir
+     * @param cpf CPF da pessoa
+     * @return A pessoa encontrada ou vazio
      */
     Optional<Pessoa> findByCpf(String cpf);
     
     /**
      * Busca pessoas pelo nome, ignorando maiúsculas e minúsculas.
-     * Útil para campos de pesquisa onde o usuário digita parte do nome.
      * 
-     * @param nome Parte do nome a ser buscada
+     * @param nome Nome ou parte do nome a ser buscado
      * @return Lista de pessoas que contêm o nome especificado
      */
-    @Query("SELECT p FROM Pessoa p WHERE LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
+    @Query("SELECT p FROM Pessoa p WHERE LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')) ORDER BY p.nome ASC")
     List<Pessoa> findByNomeContainingIgnoreCase(@Param("nome") String nome);
     
     /**
-     * Busca pessoas pelo nome com suporte a paginação.
-     * Útil para exibir resultados em páginas quando há muitos registros.
+     * Busca pessoas pelo nome, ignorando maiúsculas e minúsculas, com paginação.
      * 
-     * @param nome Parte do nome a ser buscada
-     * @param pageable Configuração de paginação (página, tamanho, ordenação)
+     * @param nome Nome ou parte do nome a ser buscado
+     * @param pageable Informações de paginação
      * @return Página de pessoas que contêm o nome especificado
      */
     @Query("SELECT p FROM Pessoa p WHERE LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
     Page<Pessoa> findByNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
     
     /**
-     * Busca pessoas por intervalo de data de nascimento.
-     * Útil para relatórios e filtros por faixa etária.
+     * Busca pessoas por data de nascimento.
      * 
-     * @param dataInicio Data de início do intervalo
-     * @param dataFim Data de fim do intervalo
+     * @param dataInicio Data inicial do intervalo
+     * @param dataFim Data final do intervalo
      * @return Lista de pessoas nascidas no intervalo especificado
      */
-    @Query("SELECT p FROM Pessoa p WHERE p.dataNascimento BETWEEN :dataInicio AND :dataFim")
+    @Query("SELECT p FROM Pessoa p WHERE p.dataNascimento BETWEEN :dataInicio AND :dataFim ORDER BY p.dataNascimento ASC")
     List<Pessoa> findByDataNascimentoBetween(
-            @Param("dataInicio") LocalDate dataInicio, 
+            @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
+    
+    /**
+     * Busca pessoa associada a um custodiado, visitante ou usuário.
+     * 
+     * @param id ID da pessoa
+     * @return true se a pessoa está em uso, false caso contrário
+     */
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true WHEN COUNT(v) > 0 THEN true WHEN COUNT(u) > 0 THEN true ELSE false END " +
+           "FROM Pessoa p LEFT JOIN Custodiado c ON p.id = c.pessoa.id " +
+           "LEFT JOIN Visitante v ON p.id = v.pessoa.id " +
+           "LEFT JOIN Usuario u ON p.id = u.pessoa.id " +
+           "WHERE p.id = :id")
+    boolean isInUse(@Param("id") Long id);
 }

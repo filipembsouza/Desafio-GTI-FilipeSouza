@@ -1,46 +1,35 @@
 package gov.df.seape.sistema.visitas.dto;
 
-import jakarta.validation.constraints.NotNull;
+import gov.df.seape.sistema.visitas.model.VincPerfilFuncionalidade;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * DTO para criação de vínculo entre Perfil e Funcionalidade.
- * Representa a associação de permissões a um perfil.
+ * DTO para envio de dados de vínculo entre Perfil e Funcionalidade.
+ * Utilizado para representar associações existentes entre perfis e funcionalidades.
  */
-public class VincPerfilFuncionalidadeRequestDTO {
-    /**
-     * ID do perfil ao qual a funcionalidade será vinculada.
-     */
-    @NotNull(message = "O ID do perfil é obrigatório")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class VincPerfilFuncionalidadeResponseDTO {
+    
+    private Long id;
     private Long perfilId;
-
-    /**
-     * ID da funcionalidade a ser vinculada ao perfil.
-     */
-    @NotNull(message = "O ID da funcionalidade é obrigatório")
+    private String descricaoPerfil;
     private Long funcionalidadeId;
-
-    // Construtores
-    public VincPerfilFuncionalidadeRequestDTO() {}
-
-    public VincPerfilFuncionalidadeRequestDTO(Long perfilId, Long funcionalidadeId) {
-        this.perfilId = perfilId;
-        this.funcionalidadeId = funcionalidadeId;
-    }
-
-    // Getters e Setters
-    public Long getPerfilId() {
-        return perfilId;
-    }
-
-    public void setPerfilId(Long perfilId) {
-        this.perfilId = perfilId;
-    }
-
-    public Long getFuncionalidadeId() {
-        return funcionalidadeId;
-    }
-
-    public void setFuncionalidadeId(Long funcionalidadeId) {
-        this.funcionalidadeId = funcionalidadeId;
+    private String descricaoFuncionalidade;
+    private String authority;
+    
+    /**
+     * Construtor que converte uma entidade VincPerfilFuncionalidade para DTO.
+     */
+    public VincPerfilFuncionalidadeResponseDTO(VincPerfilFuncionalidade vinculo) {
+        this.id = vinculo.getId();
+        this.perfilId = vinculo.getPerfil().getId();
+        this.descricaoPerfil = vinculo.getPerfil().getDescricao();
+        this.funcionalidadeId = vinculo.getFuncionalidade().getId();
+        this.descricaoFuncionalidade = vinculo.getFuncionalidade().getDescricao();
+        this.authority = vinculo.getFuncionalidade().getAuthority();
     }
 }

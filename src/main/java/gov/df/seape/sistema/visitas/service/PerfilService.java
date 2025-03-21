@@ -1,106 +1,81 @@
 package gov.df.seape.sistema.visitas.service;
 
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.PerfilRequestDTO;
 import gov.df.seape.sistema.visitas.dto.PerfilResponseDTO;
-import gov.df.seape.sistema.visitas.dto.FuncionalidadeResponseDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Interface de serviço para gerenciamento de Perfis.
- * Define operações para manipulação de perfis de usuário no sistema.
+ * Interface de serviço para operações relacionadas a Perfis de usuário.
  */
 public interface PerfilService {
     
     /**
-     * Cria um novo perfil.
+     * Criar um novo perfil.
      * 
-     * @param perfilRequestDTO Dados para criação do perfil
-     * @return Perfil criado
+     * @param requestDTO Dados do perfil a ser criado
+     * @return O perfil criado, com ID gerado
      */
-    PerfilResponseDTO criarPerfil(PerfilRequestDTO perfilRequestDTO);
+    PerfilResponseDTO criarPerfil(PerfilRequestDTO requestDTO);
     
     /**
-     * Atualiza um perfil existente.
+     * Atualizar um perfil existente.
      * 
-     * @param id Identificador do perfil
-     * @param perfilRequestDTO Novos dados do perfil
-     * @return Perfil atualizado
+     * @param id ID do perfil a ser atualizado
+     * @param requestDTO Novos dados do perfil
+     * @return O perfil atualizado
      */
-    PerfilResponseDTO atualizarPerfil(Long id, PerfilRequestDTO perfilRequestDTO);
+    PerfilResponseDTO atualizarPerfil(Long id, PerfilRequestDTO requestDTO);
     
     /**
-     * Busca um perfil pelo seu identificador.
-     * 
-     * @param id Identificador do perfil
-     * @return Optional com o perfil encontrado
-     */
-    Optional<PerfilResponseDTO> buscarPerfilPorId(Long id);
-    
-    /**
-     * Busca um perfil pela descrição.
-     * 
-     * @param descricao Descrição do perfil
-     * @return Optional com o perfil encontrado
-     */
-    Optional<PerfilResponseDTO> buscarPerfilPorDescricao(String descricao);
-    
-    /**
-     * Lista todos os perfis cadastrados.
-     * 
-     * @return Lista de todos os perfis
-     */
-    List<PerfilResponseDTO> listarTodosPerfis();
-    
-    /**
-     * Lista perfis com suporte a paginação.
+     * Buscar todos os perfis com paginação.
      * 
      * @param pageable Configurações de paginação
      * @return Página de perfis
      */
-    Page<PerfilResponseDTO> listarPerfisPaginado(Pageable pageable);
+    PageResponseDTO<PerfilResponseDTO> listarPerfisPaginados(Pageable pageable);
     
     /**
-     * Remove um perfil pelo seu identificador.
+     * Buscar todos os perfis.
      * 
-     * @param id Identificador do perfil a ser removido
+     * @return Lista de todos os perfis
      */
-    void excluirPerfil(Long id);
+    List<PerfilResponseDTO> listarPerfis();
     
     /**
-     * Busca perfis por descrição.
+     * Buscar um perfil específico pelo ID.
      * 
-     * @param descricao Termo de busca na descrição
-     * @return Lista de perfis correspondentes
+     * @param id ID do perfil a ser buscado
+     * @return O perfil encontrado
      */
-    List<PerfilResponseDTO> buscarPerfilPorDescricaoContendo(String descricao);
+    PerfilResponseDTO buscarPerfilPorId(Long id);
     
     /**
-     * Adiciona uma funcionalidade a um perfil.
+     * Buscar perfis por descrição.
      * 
-     * @param perfilId ID do perfil
-     * @param funcionalidadeId ID da funcionalidade
-     * @return Perfil atualizado
+     * @param descricao Descrição ou parte da descrição
+     * @param pageable Configurações de paginação
+     * @return Página de perfis que contêm a descrição especificada
      */
-    PerfilResponseDTO adicionarFuncionalidade(Long perfilId, Long funcionalidadeId);
+    PageResponseDTO<PerfilResponseDTO> buscarPorDescricao(String descricao, Pageable pageable);
     
     /**
-     * Remove uma funcionalidade de um perfil.
-     * 
-     * @param perfilId ID do perfil
-     * @param funcionalidadeId ID da funcionalidade
-     * @return Perfil atualizado
-     */
-    PerfilResponseDTO removerFuncionalidade(Long perfilId, Long funcionalidadeId);
-    
-    /**
-     * Lista funcionalidades de um perfil.
+     * Adicionar funcionalidades a um perfil.
      * 
      * @param perfilId ID do perfil
-     * @return Lista de funcionalidades do perfil
+     * @param funcionalidadeIds Lista de IDs de funcionalidades a serem adicionadas
+     * @return O perfil atualizado com as novas funcionalidades
      */
-    List<FuncionalidadeResponseDTO> listarFuncionalidadesDoPerfil(Long perfilId);
+    PerfilResponseDTO adicionarFuncionalidades(Long perfilId, List<Long> funcionalidadeIds);
+    
+    /**
+     * Remover funcionalidades de um perfil.
+     * 
+     * @param perfilId ID do perfil
+     * @param funcionalidadeIds Lista de IDs de funcionalidades a serem removidas
+     * @return O perfil atualizado
+     */
+    PerfilResponseDTO removerFuncionalidades(Long perfilId, List<Long> funcionalidadeIds);
 }

@@ -1,125 +1,49 @@
 package gov.df.seape.sistema.visitas.dto;
 
+import gov.df.seape.sistema.visitas.model.AgendamentoVisita;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * DTO para resposta de agendamento de visita.
- * Contém informações detalhadas do agendamento.
- */
+@Data
+@NoArgsConstructor
 public class AgendamentoVisitaResponseDTO {
-    /**
-     * ID único do agendamento.
-     */
+    
     private Long id;
-
-    /**
-     * Custodiado que receberá a visita.
-     */
-    private CustodiadoResponseDTO custodiado;
-
-    /**
-     * Visitante que realizará a visita.
-     */
-    private VisitanteResponseDTO visitante;
-
-    /**
-     * Data e hora do agendamento.
-     */
+    private Long custodiadoId;
+    private String nomeCustodiado;
+    private String numeroProntuarioCustodiado;
+    private Long visitanteId;
+    private String nomeVisitante;
+    private String cpfVisitante;
     private LocalDateTime dataHoraAgendamento;
-
-    /**
-     * Status atual do agendamento.
-     */
-    private StatusResponseDTO status;
-
-    /**
-     * Data de criação do agendamento.
-     */
+    private String dataHoraFormatada;
+    private Long statusId;
+    private String descricaoStatus;
+    private Long unidadePenalId;
+    private String nomeUnidadePenal;
     private LocalDateTime dataCriacao;
-
-    /**
-     * Data da última atualização do agendamento.
-     */
     private LocalDateTime dataAtualizacao;
-
-    /**
-     * Construtor padrão.
-     */
-    public AgendamentoVisitaResponseDTO() {}
-
-    /**
-     * Construtor com todos os campos.
-     */
-    public AgendamentoVisitaResponseDTO(Long id, 
-                                         CustodiadoResponseDTO custodiado, 
-                                         VisitanteResponseDTO visitante, 
-                                         LocalDateTime dataHoraAgendamento, 
-                                         StatusResponseDTO status,
-                                         LocalDateTime dataCriacao,
-                                         LocalDateTime dataAtualizacao) {
-        this.id = id;
-        this.custodiado = custodiado;
-        this.visitante = visitante;
-        this.dataHoraAgendamento = dataHoraAgendamento;
-        this.status = status;
-        this.dataCriacao = dataCriacao;
-        this.dataAtualizacao = dataAtualizacao;
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public CustodiadoResponseDTO getCustodiado() {
-        return custodiado;
-    }
-
-    public void setCustodiado(CustodiadoResponseDTO custodiado) {
-        this.custodiado = custodiado;
-    }
-
-    public VisitanteResponseDTO getVisitante() {
-        return visitante;
-    }
-
-    public void setVisitante(VisitanteResponseDTO visitante) {
-        this.visitante = visitante;
-    }
-
-    public LocalDateTime getDataHoraAgendamento() {
-        return dataHoraAgendamento;
-    }
-
-    public void setDataHoraAgendamento(LocalDateTime dataHoraAgendamento) {
-        this.dataHoraAgendamento = dataHoraAgendamento;
-    }
-
-    public StatusResponseDTO getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusResponseDTO status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-
-    public void setDataCriacao(LocalDateTime dataCriacao) {
-        this.dataCriacao = dataCriacao;
-    }
-
-    public LocalDateTime getDataAtualizacao() {
-        return dataAtualizacao;
-    }
-
-    public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
-        this.dataAtualizacao = dataAtualizacao;
+    private String observacoes;
+    
+    public AgendamentoVisitaResponseDTO(AgendamentoVisita agendamento) {
+        this.id = agendamento.getId();
+        this.custodiadoId = agendamento.getCustodiado().getId();
+        this.nomeCustodiado = agendamento.getCustodiado().getPessoa().getNome();
+        this.numeroProntuarioCustodiado = agendamento.getCustodiado().getNumeroProntuario();
+        this.visitanteId = agendamento.getVisitante().getId();
+        this.nomeVisitante = agendamento.getVisitante().getPessoa().getNome();
+        this.cpfVisitante = agendamento.getVisitante().getPessoa().getCpf();
+        this.dataHoraAgendamento = agendamento.getDataHoraAgendamento();
+        this.dataHoraFormatada = agendamento.getDataHoraAgendamento()
+            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        this.statusId = agendamento.getStatus().getId();
+        this.descricaoStatus = agendamento.getStatus().getDescricao();
+        this.unidadePenalId = agendamento.getCustodiado().getUnidadePenal().getId();
+        this.nomeUnidadePenal = agendamento.getCustodiado().getUnidadePenal().getNome();
+        this.dataCriacao = agendamento.getDataCriacao();
+        this.dataAtualizacao = agendamento.getDataAtualizacao();
+        this.observacoes = agendamento.getObservacoes();
     }
 }

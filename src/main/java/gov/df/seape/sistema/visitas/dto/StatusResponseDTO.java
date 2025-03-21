@@ -1,37 +1,20 @@
 package gov.df.seape.sistema.visitas.dto;
 
-/**
- * DTO para retorno de dados da entidade Status.
- * Usado para enviar informações de Status nas respostas da API.
- */
+import gov.df.seape.sistema.visitas.model.Status;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StatusResponseDTO {
     
     private Long id;
     private String descricao;
     
-    // Construtores
-    public StatusResponseDTO() {
-    }
-    
-    public StatusResponseDTO(Long id, String descricao) {
-        this.id = id;
-        this.descricao = descricao;
-    }
-    
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public String getDescricao() {
-        return descricao;
-    }
-    
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public StatusResponseDTO(Status status) {
+        this.id = status.getId();
+        this.descricao = status.getDescricao();
     }
 }

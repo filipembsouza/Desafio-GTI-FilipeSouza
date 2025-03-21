@@ -1,79 +1,80 @@
 package gov.df.seape.sistema.visitas.service;
 
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.VisitanteRequestDTO;
 import gov.df.seape.sistema.visitas.dto.VisitanteResponseDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Interface de serviço para gerenciamento de Visitantes.
- * Define operações para manipulação de visitantes no sistema prisional.
+ * Interface de serviço para operações relacionadas a Visitantes.
  */
 public interface VisitanteService {
     
     /**
-     * Cria um novo visitante.
+     * Criar um novo visitante.
      * 
-     * @param visitanteRequestDTO Dados para criação do visitante
-     * @return Visitante criado
+     * @param requestDTO Dados do visitante a ser criado
+     * @return O visitante criado, com ID gerado
      */
-    VisitanteResponseDTO criarVisitante(VisitanteRequestDTO visitanteRequestDTO);
+    VisitanteResponseDTO criarVisitante(VisitanteRequestDTO requestDTO);
     
     /**
-     * Atualiza um visitante existente.
+     * Atualizar um visitante existente.
      * 
-     * @param id Identificador do visitante
-     * @param visitanteRequestDTO Novos dados do visitante
-     * @return Visitante atualizado
+     * @param id ID do visitante a ser atualizado
+     * @param requestDTO Novos dados do visitante
+     * @return O visitante atualizado
      */
-    VisitanteResponseDTO atualizarVisitante(Long id, VisitanteRequestDTO visitanteRequestDTO);
+    VisitanteResponseDTO atualizarVisitante(Long id, VisitanteRequestDTO requestDTO);
     
     /**
-     * Busca um visitante pelo seu identificador.
-     * 
-     * @param id Identificador do visitante
-     * @return Optional com o visitante encontrado
-     */
-    Optional<VisitanteResponseDTO> buscarVisitantePorId(Long id);
-    
-    /**
-     * Busca um visitante pelo CPF.
-     * 
-     * @param cpf CPF do visitante
-     * @return Optional com o visitante encontrado
-     */
-    Optional<VisitanteResponseDTO> buscarVisitantePorCpf(String cpf);
-    
-    /**
-     * Lista todos os visitantes cadastrados.
-     * 
-     * @return Lista de todos os visitantes
-     */
-    List<VisitanteResponseDTO> listarTodosVisitantes();
-    
-    /**
-     * Lista visitantes com suporte a paginação.
+     * Buscar todos os visitantes com paginação.
      * 
      * @param pageable Configurações de paginação
      * @return Página de visitantes
      */
-    Page<VisitanteResponseDTO> listarVisitantesPaginado(Pageable pageable);
+    PageResponseDTO<VisitanteResponseDTO> listarVisitantesPaginados(Pageable pageable);
     
     /**
-     * Remove um visitante pelo seu identificador.
+     * Buscar todos os visitantes.
      * 
-     * @param id Identificador do visitante a ser removido
+     * @return Lista de todos os visitantes
      */
-    void excluirVisitante(Long id);
+    List<VisitanteResponseDTO> listarVisitantes();
     
     /**
-     * Busca visitantes por nome.
+     * Buscar um visitante específico pelo ID.
      * 
-     * @param nome Termo de busca no nome
-     * @return Lista de visitantes correspondentes
+     * @param id ID do visitante a ser buscado
+     * @return O visitante encontrado
      */
-    List<VisitanteResponseDTO> buscarVisitantePorNome(String nome);
+    VisitanteResponseDTO buscarVisitantePorId(Long id);
+    
+    /**
+     * Buscar um visitante pelo CPF.
+     * 
+     * @param cpf CPF do visitante
+     * @return O visitante encontrado
+     */
+    VisitanteResponseDTO buscarPorCpf(String cpf);
+    
+    /**
+     * Buscar visitantes por nome.
+     * 
+     * @param nome Nome ou parte do nome
+     * @param pageable Configurações de paginação
+     * @return Página de visitantes que contêm o nome especificado
+     */
+    PageResponseDTO<VisitanteResponseDTO> buscarPorNome(String nome, Pageable pageable);
+    
+    /**
+     * Buscar visitantes que visitam um determinado custodiado.
+     * 
+     * @param custodiadoId ID do custodiado
+     * @param pageable Configurações de paginação
+     * @return Página de visitantes que visitam o custodiado especificado
+     */
+    PageResponseDTO<VisitanteResponseDTO> buscarVisitantesPorCustodiado(Long custodiadoId, Pageable pageable);
 }

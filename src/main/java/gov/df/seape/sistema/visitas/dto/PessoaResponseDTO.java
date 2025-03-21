@@ -18,18 +18,28 @@ public class PessoaResponseDTO {
     private String nome;
 
     /**
-     * CPF da pessoa (pode ser parcialmente mascarado).
+     * CPF da pessoa (deve ser único no sistema).
      */
     private String cpf;
 
     /**
-     * Data de nascimento da pessoa.
+     * Data de nascimento da pessoa (campo obrigatório).
      */
     private LocalDate dataNascimento;
 
-    // Construtores
+    /**
+     * Construtor padrão (necessário para serialização e frameworks como Jackson).
+     */
     public PessoaResponseDTO() {}
 
+    /**
+     * Construtor completo para criação do DTO.
+     *
+     * @param id Identificador único da pessoa.
+     * @param nome Nome completo da pessoa.
+     * @param cpf CPF da pessoa.
+     * @param dataNascimento Data de nascimento (obrigatória).
+     */
     public PessoaResponseDTO(Long id, String nome, String cpf, LocalDate dataNascimento) {
         this.id = id;
         this.nome = nome;

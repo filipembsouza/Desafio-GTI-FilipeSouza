@@ -87,6 +87,24 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+    
+    /**
+     * Trata exceções de horários não permitidos.
+     * 
+     * Retorna uma resposta 400 com detalhes sobre o horário inválido.
+     */
+    @ExceptionHandler(HorarioNaoPermitidoException.class)
+    public ResponseEntity<ErrorResponse> handleHorarioNaoPermitido(HorarioNaoPermitidoException ex) {
+        log.warn("Horário não permitido: {}", ex.getMessage());
+        
+        ErrorResponse response = new ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     /**
      * Trata exceções de validação de argumentos.

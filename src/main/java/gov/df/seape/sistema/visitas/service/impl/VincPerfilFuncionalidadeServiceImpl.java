@@ -1,5 +1,7 @@
 package gov.df.seape.sistema.visitas.service.impl;
 
+import gov.df.seape.sistema.visitas.dto.FuncionalidadeResponseDTO;
+import gov.df.seape.sistema.visitas.dto.PerfilResponseDTO;
 import gov.df.seape.sistema.visitas.dto.VincPerfilFuncionalidadeRequestDTO;
 import gov.df.seape.sistema.visitas.dto.VincPerfilFuncionalidadeResponseDTO;
 import gov.df.seape.sistema.visitas.exception.RecursoNaoEncontradoException;
@@ -12,8 +14,6 @@ import gov.df.seape.sistema.visitas.repository.VincPerfilFuncionalidadeRepositor
 import gov.df.seape.sistema.visitas.service.VincPerfilFuncionalidadeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,12 +107,7 @@ public class VincPerfilFuncionalidadeServiceImpl implements VincPerfilFuncionali
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<VincPerfilFuncionalidadeResponseDTO> listarVinculosPaginado(Pageable pageable) {
-        return vincRepository.findAllOrderByPerfilAndFuncionalidade(pageable)
-                .map(this::convertToResponseDTO);
-    }
+    
 
     @Override
     @Transactional

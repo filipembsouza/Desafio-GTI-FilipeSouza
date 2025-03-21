@@ -15,7 +15,6 @@ import java.util.Optional;
 
 /**
  * Repositório para a entidade Custodiado.
- * Fornece métodos para realizar operações de banco de dados relacionadas a Custodiados.
  */
 @Repository
 public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
@@ -23,115 +22,106 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     /**
      * Busca um custodiado pelo número de prontuário.
      * 
-     * @param numeroProntuario O número de prontuário a ser buscado
-     * @return O custodiado encontrado, ou vazio se não existir
+     * @param numeroProntuario Número de prontuário a ser buscado
+     * @return O custodiado encontrado ou vazio
      */
     Optional<Custodiado> findByNumeroProntuario(String numeroProntuario);
     
     /**
      * Busca um custodiado pela pessoa associada.
      * 
-     * @param pessoa A entidade Pessoa associada ao custodiado
-     * @return O custodiado encontrado, ou vazio se não existir
+     * @param pessoa Pessoa associada ao custodiado
+     * @return O custodiado encontrado ou vazio
      */
     Optional<Custodiado> findByPessoa(Pessoa pessoa);
     
     /**
-     * Busca um custodiado diretamente pelo ID da pessoa associada.
-     * Este método simplifica a busca quando só temos o ID da pessoa,
-     * evitando a necessidade de buscar a entidade Pessoa completa antes.
+     * Busca um custodiado pelo ID da pessoa associada.
      * 
-     * @param pessoaId O ID da pessoa associada ao custodiado
-     * @return O custodiado encontrado, ou vazio se não existir
+     * @param pessoaId ID da pessoa associada ao custodiado
+     * @return O custodiado encontrado ou vazio
      */
     Optional<Custodiado> findByPessoaId(Long pessoaId);
     
     /**
      * Lista todos os custodiados de uma determinada unidade penal.
-     * ordenados pelo nome da pessoa associada.
      * 
-     * @param unidadePenal A unidade penal para filtrar os custodiados
+     * @param unidadePenal Unidade penal a ser filtrada
      * @return Lista de custodiados da unidade penal especificada
      */
-    List<Custodiado> findByUnidadePenalOrderByPessoaNomeAsc(UnidadePenal unidadePenal);
+    List<Custodiado> findByUnidadePenal(UnidadePenal unidadePenal);
     
     /**
-     * Lista todos os custodiados de uma determinada unidade penal com suporte a paginação.
-     * Esta versão paginada é útil quando há muitos custodiados em uma unidade,
-     * permitindo carregar os dados em partes para melhor desempenho.
+     * Lista todos os custodiados de uma determinada unidade penal por ID.
      * 
-     * @param unidadePenal A unidade penal para filtrar os custodiados
-     * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
+     * @param unidadePenalId ID da unidade penal a ser filtrada
+     * @return Lista de custodiados da unidade penal especificada
+     */
+    @Query("SELECT c FROM Custodiado c WHERE c.unidadePenal.id = :unidadePenalId")
+    List<Custodiado> findByUnidadePenalId(@Param("unidadePenalId") Long unidadePenalId);
+    
+    /**
+     * Lista todos os custodiados de uma determinada unidade penal com paginação.
+     * 
+     * @param unidadePenalId ID da unidade penal a ser filtrada
+     * @param pageable Informações de paginação
      * @return Página de custodiados da unidade penal especificada
      */
-    @Query("SELECT c FROM Custodiado c WHERE c.unidadePenal = :unidadePenal ORDER BY c.pessoa.nome ASC")
-    Page<Custodiado> findByUnidadePenal(@Param("unidadePenal") UnidadePenal unidadePenal, Pageable pageable);
+    @Query("SELECT c FROM Custodiado c WHERE c.unidadePenal.id = :unidadePenalId")
+    Page<Custodiado> findByUnidadePenalId(@Param("unidadePenalId") Long unidadePenalId, Pageable pageable);
     
     /**
-     * Busca custodiados cujo vulgo (apelido) contenha o termo especificado.
-     * Esta consulta ignora maiúsculas/minúsculas para facilitar a busca.
-     * Os resultados são retornados ordenados pelo nome da pessoa
+     * Busca custodiados pelo vulgo, ignorando maiúsculas e minúsculas.
      * 
-     * @param vulgo Termo de busca para o vulgo
-     * @return Lista de custodiados que atendem ao critério
+     * @param vulgo Vulgo ou parte do vulgo a ser buscado
+     * @return Lista de custodiados que contêm o vulgo especificado
      */
     @Query("SELECT c FROM Custodiado c WHERE LOWER(c.vulgo) LIKE LOWER(CONCAT('%', :vulgo, '%')) ORDER BY c.pessoa.nome ASC")
     List<Custodiado> findByVulgoContainingIgnoreCase(@Param("vulgo") String vulgo);
     
     /**
-     * Busca custodiados cujo vulgo (apelido) contenha o termo especificado, com suporte a paginação.
+     * Busca custodiados pelo vulgo, ignorando maiúsculas e minúsculas, com paginação.
      * 
-     * @param vulgo Termo de busca para o vulgo
-     * @param pageable Objeto com informações de paginação
-     * @return Página de custodiados que atendem ao critério
+     * @param vulgo Vulgo ou parte do vulgo a ser buscado
+     * @param pageable Informações de paginação
+     * @return Página de custodiados que contêm o vulgo especificado
      */
     @Query("SELECT c FROM Custodiado c WHERE LOWER(c.vulgo) LIKE LOWER(CONCAT('%', :vulgo, '%'))")
     Page<Custodiado> findByVulgoContainingIgnoreCase(@Param("vulgo") String vulgo, Pageable pageable);
-
+    
     /**
      * Busca custodiados pelo nome, ignorando maiúsculas e minúsculas.
-     * Os resultados são ordenados pelo nome da pessoa.
-     *
-     * @param nome Nome ou parte do nome do custodiado a ser buscado
-     * @return Lista de custodiados que possuem o nome ou parte dele
+     * 
+     * @param nome Nome ou parte do nome a ser buscado
+     * @return Lista de custodiados que contêm o nome especificado
      */
     @Query("SELECT c FROM Custodiado c WHERE LOWER(c.pessoa.nome) LIKE LOWER(CONCAT('%', :nome, '%')) ORDER BY c.pessoa.nome ASC")
     List<Custodiado> findByNomeContainingIgnoreCase(@Param("nome") String nome);
     
     /**
-     * Busca custodiados pelo nome com suporte a paginação.
+     * Busca custodiados pelo nome, ignorando maiúsculas e minúsculas, com paginação.
      * 
-     * @param nome Nome ou parte do nome do custodiado
-     * @param pageable Objeto com informações de paginação
-     * @return Página de custodiados que possuem o nome ou parte dele
+     * @param nome Nome ou parte do nome a ser buscado
+     * @param pageable Informações de paginação
+     * @return Página de custodiados que contêm o nome especificado
      */
     @Query("SELECT c FROM Custodiado c WHERE LOWER(c.pessoa.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
     Page<Custodiado> findByNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
     
     /**
-     * Busca avançada de custodiados por múltiplos critérios combinados.
-     * Este método permite realizar pesquisas complexas usando diferentes filtros
-     * simultaneamente. Os parâmetros são opcionais - quando null, não são aplicados
-     * como filtro.
+     * Conta o número de custodiados por unidade penal.
      * 
-     * Especialmente útil para telas de pesquisa avançada no sistema.
-     * 
-     * @param nome Nome ou parte do nome (opcional)
-     * @param vulgo Vulgo ou parte do vulgo (opcional)
-     * @param numeroProntuario Número do prontuário ou parte dele (opcional)
-     * @param unidadePenalId ID da unidade penal (opcional)
-     * @param pageable Objeto com informações de paginação
-     * @return Página de custodiados que atendem a todos os critérios fornecidos
+     * @return Lista contendo unidade penal e contagem de custodiados
      */
-    @Query("SELECT c FROM Custodiado c WHERE " +
-           "(:nome IS NULL OR LOWER(c.pessoa.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND " +
-           "(:vulgo IS NULL OR LOWER(c.vulgo) LIKE LOWER(CONCAT('%', :vulgo, '%'))) AND " +
-           "(:numeroProntuario IS NULL OR LOWER(c.numeroProntuario) LIKE LOWER(CONCAT('%', :numeroProntuario, '%'))) AND " +
-           "(:unidadePenalId IS NULL OR c.unidadePenal.id = :unidadePenalId)")
-    Page<Custodiado> buscarPorMultiplosCriterios(
-            @Param("nome") String nome,
-            @Param("vulgo") String vulgo,
-            @Param("numeroProntuario") String numeroProntuario,
-            @Param("unidadePenalId") Long unidadePenalId,
-            Pageable pageable);
+    @Query("SELECT c.unidadePenal.nome as unidade, COUNT(c) as quantidade FROM Custodiado c GROUP BY c.unidadePenal.nome ORDER BY COUNT(c) DESC")
+    List<Object[]> countByUnidadePenal();
+    
+    /**
+     * Conta o número de custodiados em uma unidade penal específica.
+     * 
+     * @param unidadePenalId ID da unidade penal
+     * @return Número de custodiados na unidade penal
+     */
+    @Query("SELECT COUNT(c) FROM Custodiado c WHERE c.unidadePenal.id = :unidadePenalId")
+    long countByUnidadePenalId(@Param("unidadePenalId") Long unidadePenalId);
 }

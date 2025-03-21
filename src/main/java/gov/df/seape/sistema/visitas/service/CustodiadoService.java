@@ -2,94 +2,88 @@ package gov.df.seape.sistema.visitas.service;
 
 import gov.df.seape.sistema.visitas.dto.CustodiadoRequestDTO;
 import gov.df.seape.sistema.visitas.dto.CustodiadoResponseDTO;
-import org.springframework.data.domain.Page;
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Interface de serviço para gerenciamento de Custodiados.
- * Define operações para manipulação de detentos no sistema prisional.
+ * Interface de serviço para operações relacionadas a Custodiados.
  */
 public interface CustodiadoService {
     
     /**
-     * Cria um novo custodiado.
+     * Criar um novo custodiado.
      * 
-     * @param custodiadoRequestDTO Dados para criação do custodiado
-     * @return Custodiado criado
+     * @param requestDTO Dados do custodiado a ser criado
+     * @return O custodiado criado, com ID gerado
      */
-    CustodiadoResponseDTO criarCustodiado(CustodiadoRequestDTO custodiadoRequestDTO);
+    CustodiadoResponseDTO criarCustodiado(CustodiadoRequestDTO requestDTO);
     
     /**
-     * Atualiza um custodiado existente.
+     * Atualizar um custodiado existente.
      * 
-     * @param id Identificador do custodiado
-     * @param custodiadoRequestDTO Novos dados do custodiado
-     * @return Custodiado atualizado
+     * @param id ID do custodiado a ser atualizado
+     * @param requestDTO Novos dados do custodiado
+     * @return O custodiado atualizado
      */
-    CustodiadoResponseDTO atualizarCustodiado(Long id, CustodiadoRequestDTO custodiadoRequestDTO);
+    CustodiadoResponseDTO atualizarCustodiado(Long id, CustodiadoRequestDTO requestDTO);
     
     /**
-     * Busca um custodiado pelo seu identificador.
-     * 
-     * @param id Identificador do custodiado
-     * @return Optional com o custodiado encontrado
-     */
-    Optional<CustodiadoResponseDTO> buscarCustodiadoPorId(Long id);
-    
-    /**
-     * Busca um custodiado pelo número do prontuário.
-     * 
-     * @param numeroProntuario Número do prontuário
-     * @return Optional com o custodiado encontrado
-     */
-    Optional<CustodiadoResponseDTO> buscarCustodiadoPorNumeroProntuario(String numeroProntuario);
-    
-    /**
-     * Lista todos os custodiados cadastrados.
-     * 
-     * @return Lista de todos os custodiados
-     */
-    List<CustodiadoResponseDTO> listarTodosCustodiados();
-    
-    /**
-     * Lista custodiados com suporte a paginação.
+     * Buscar todos os custodiados com paginação.
      * 
      * @param pageable Configurações de paginação
      * @return Página de custodiados
      */
-    Page<CustodiadoResponseDTO> listarCustodiadosPaginado(Pageable pageable);
+    PageResponseDTO<CustodiadoResponseDTO> listarCustodiadosPaginados(Pageable pageable);
     
     /**
-     * Remove um custodiado pelo seu identificador.
+     * Buscar todos os custodiados.
      * 
-     * @param id Identificador do custodiado a ser removido
+     * @return Lista de todos os custodiados
      */
-    void excluirCustodiado(Long id);
+    List<CustodiadoResponseDTO> listarCustodiados();
     
     /**
-     * Busca custodiados por nome.
+     * Buscar um custodiado específico pelo ID.
      * 
-     * @param nome Termo de busca no nome
-     * @return Lista de custodiados correspondentes
+     * @param id ID do custodiado a ser buscado
+     * @return O custodiado encontrado
      */
-    List<CustodiadoResponseDTO> buscarCustodiadoPorNome(String nome);
+    CustodiadoResponseDTO buscarCustodiadoPorId(Long id);
     
     /**
-     * Busca custodiados por vulgo.
+     * Buscar um custodiado pelo número de prontuário.
      * 
-     * @param vulgo Termo de busca no vulgo
-     * @return Lista de custodiados correspondentes
+     * @param numeroProntuario Número do prontuário
+     * @return O custodiado encontrado
      */
-    List<CustodiadoResponseDTO> buscarCustodiadoPorVulgo(String vulgo);
+    CustodiadoResponseDTO buscarPorNumeroProntuario(String numeroProntuario);
     
     /**
-     * Busca custodiados por unidade penal.
+     * Buscar custodiados por nome.
+     * 
+     * @param nome Nome ou parte do nome
+     * @param pageable Configurações de paginação
+     * @return Página de custodiados que contêm o nome especificado
+     */
+    PageResponseDTO<CustodiadoResponseDTO> buscarPorNome(String nome, Pageable pageable);
+    
+    /**
+     * Buscar custodiados por unidade penal.
      * 
      * @param unidadePenalId ID da unidade penal
-     * @return Lista de custodiados da unidade penal
+     * @param pageable Configurações de paginação
+     * @return Página de custodiados da unidade penal
      */
-    List<CustodiadoResponseDTO> buscarCustodiadoPorUnidadePenal(Long unidadePenalId);
+    PageResponseDTO<CustodiadoResponseDTO> buscarPorUnidadePenal(Long unidadePenalId, Pageable pageable);
+    
+    /**
+     * Buscar custodiados pelo vulgo (apelido).
+     * 
+     * @param vulgo Vulgo ou parte do vulgo
+     * @param pageable Configurações de paginação
+     * @return Página de custodiados que contêm o vulgo especificado
+     */
+    PageResponseDTO<CustodiadoResponseDTO> buscarPorVulgo(String vulgo, Pageable pageable);
 }

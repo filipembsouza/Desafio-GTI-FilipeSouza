@@ -1,13 +1,13 @@
 package gov.df.seape.sistema.visitas.controller;
 
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.StatusRequestDTO;
 import gov.df.seape.sistema.visitas.dto.StatusResponseDTO;
 import gov.df.seape.sistema.visitas.service.StatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,59 +16,53 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador REST para gerenciamento de Status no sistema de visitas prisionais.
- * Fornece endpoints para operações de criação, atualização, consulta e exclusão de status.
+ * Controlador REST para gerenciamento de Status de Agendamentos.
  */
 @RestController
 @RequestMapping("/api/status")
+@RequiredArgsConstructor
 @Tag(name = "Status", description = "Endpoints para gerenciamento de status de agendamentos")
 public class StatusController {
 
     private final StatusService statusService;
 
-    @Autowired
-    public StatusController(StatusService statusService) {
-        this.statusService = statusService;
-    }
-
     /**
-     * Cria um novo status no sistema.
+     * Cria um novo status.
      * 
-     * @param statusRequestDTO Dados do novo status
-     * @return Resposta contendo o status criado e código HTTP de criação
+     * @param requestDTO Dados do status a ser criado
+     * @return O status criado com status 201 (Created)
      */
     @PostMapping
-    @Operation(summary = "Criar novo status", description = "Endpoint para criar um novo status de agendamento")
-    public ResponseEntity<StatusResponseDTO> criarStatus(
-            @Valid @RequestBody StatusRequestDTO statusRequestDTO) {
-        StatusResponseDTO novoStatus = statusService.criarStatus(statusRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoStatus);
+    @Operation(summary = "Criar status", description = "Cria um novo status de agendamento")
+    public ResponseEntity<StatusResponseDTO> criarStatus(@Valid @RequestBody StatusRequestDTO requestDTO) {
+        StatusResponseDTO responseDTO = statusService.criarStatus(requestDTO);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     /**
      * Atualiza um status existente.
      * 
-     * @param id Identificador do status a ser atualizado
-     * @param statusRequestDTO Novos dados do status
-     * @return Resposta contendo o status atualizado
+     * @param id ID do status a ser atualizado
+     * @param requestDTO Novos dados do status
+     * @return O status atualizado
      */
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar status", description = "Endpoint para atualizar um status existente")
+    @Operation(summary = "Atualizar status", description = "Atualiza um status existente")
     public ResponseEntity<StatusResponseDTO> atualizarStatus(
             @PathVariable Long id, 
-            @Valid @RequestBody StatusRequestDTO statusRequestDTO) {
-        StatusResponseDTO statusAtualizado = statusService.atualizarStatus(id, statusRequestDTO);
-        return ResponseEntity.ok(statusAtualizado);
+            @Valid @RequestBody StatusRequestDTO requestDTO) {
+        StatusResponseDTO responseDTO = statusService.atualizarStatus(id, requestDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
     /**
-     * Busca um status pelo seu identificador.
+     * Busca um status pelo seu ID.
      * 
-     * @param id Identificador do status
-     * @return Resposta contendo o status encontrado
+     * @param id ID do status a ser buscado
+     * @return O status encontrado
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar status por ID", description = "Endpoint para recuperar um status específico")
+    @Operation(summary = "Buscar status por ID", description = "Retorna um status específico pelo ID")
     public ResponseEntity<StatusResponseDTO> buscarStatusPorId(@PathVariable Long id) {
         return statusService.buscarStatusPorId(id)
                 .map(ResponseEntity::ok)
@@ -76,38 +70,38 @@ public class StatusController {
     }
 
     /**
-     * Lista todos os status cadastrados.
+     * Lista todos os status.
      * 
      * @return Lista de todos os status
      */
     @GetMapping
-    @Operation(summary = "Listar todos os status", description = "Endpoint para recuperar todos os status")
+    @Operation(summary = "Listar status", description = "Lista todos os status de agendamento")
     public ResponseEntity<List<StatusResponseDTO>> listarTodosStatus() {
         List<StatusResponseDTO> statusList = statusService.listarTodosStatus();
         return ResponseEntity.ok(statusList);
     }
 
     /**
-     * Lista status paginados.
+     * Lista status com paginação.
      * 
-     * @param pageable Informações de paginação
+     * @param pageable Configurações de paginação
      * @return Página de status
      */
     @GetMapping("/paginado")
-    @Operation(summary = "Listar status paginados", description = "Endpoint para recuperar status com paginação")
-    public ResponseEntity<Page<StatusResponseDTO>> listarStatusPaginado(Pageable pageable) {
-        Page<StatusResponseDTO> statusPage = statusService.listarStatusPaginado(pageable);
-        return ResponseEntity.ok(statusPage);
+    @Operation(summary = "Listar status paginados", description = "Lista todos os status com paginação")
+    public ResponseEntity<PageResponseDTO<StatusResponseDTO>> listarStatusPaginado(Pageable pageable) {
+        PageResponseDTO<StatusResponseDTO> pageResponseDTO = statusService.listarStatusPaginado(pageable);
+        return ResponseEntity.ok(pageResponseDTO);
     }
 
     /**
      * Busca status por descrição.
      * 
      * @param descricao Termo de busca na descrição do status
-     * @return Lista de status que correspondem à descrição
+     * @return Lista de status que contêm a descrição especificada
      */
     @GetMapping("/busca")
-    @Operation(summary = "Buscar status por descrição", description = "Endpoint para buscar status contendo um termo")
+    @Operation(summary = "Buscar por descrição", description = "Busca status por descrição")
     public ResponseEntity<List<StatusResponseDTO>> buscarStatusPorDescricao(
             @RequestParam String descricao) {
         List<StatusResponseDTO> statusList = statusService.buscarStatusPorDescricao(descricao);
@@ -115,13 +109,13 @@ public class StatusController {
     }
 
     /**
-     * Exclui um status pelo seu identificador.
+     * Exclui um status pelo seu ID.
      * 
-     * @param id Identificador do status a ser excluído
-     * @return Resposta indicando sucesso na exclusão
+     * @param id ID do status a ser excluído
+     * @return Status 204 (No Content)
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir status", description = "Endpoint para remover um status")
+    @Operation(summary = "Excluir status", description = "Exclui um status existente")
     public ResponseEntity<Void> excluirStatus(@PathVariable Long id) {
         statusService.excluirStatus(id);
         return ResponseEntity.noContent().build();

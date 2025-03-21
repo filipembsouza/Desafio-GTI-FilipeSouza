@@ -29,6 +29,14 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     Optional<Custodiado> findByNumeroProntuario(String numeroProntuario);
     
     /**
+     * Verifica se existe custodiado com o número de prontuário informado.
+     * 
+     * @param numeroProntuario O número de prontuário
+     * @return true se existir, false caso contrário
+     */
+    boolean existsByNumeroProntuario(String numeroProntuario);
+    
+    /**
      * Busca um custodiado pela pessoa associada.
      * 
      * @param pessoa A entidade Pessoa associada ao custodiado
@@ -47,7 +55,7 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     Optional<Custodiado> findByPessoaId(Long pessoaId);
     
     /**
-     * Lista todos os custodiados de uma determinada unidade penal.
+     * Lista todos os custodiados de uma determinada unidade penal,
      * ordenados pelo nome da pessoa associada.
      * 
      * @param unidadePenal A unidade penal para filtrar os custodiados
@@ -65,9 +73,8 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     List<Custodiado> findByUnidadePenal(@Param("unidadePenalId") Long unidadePenalId);
     
     /**
-     * Lista todos os custodiados de uma determinada unidade penal com suporte a paginação.
-     * Esta versão paginada é útil quando há muitos custodiados em uma unidade,
-     * permitindo carregar os dados em partes para melhor desempenho.
+     * Lista os custodiados de uma determinada unidade penal com suporte a paginação,
+     * utilizando a entidade UnidadePenal, ordenados pelo nome da pessoa.
      * 
      * @param unidadePenal A unidade penal para filtrar os custodiados
      * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
@@ -75,6 +82,17 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
      */
     @Query("SELECT c FROM Custodiado c WHERE c.unidadePenal = :unidadePenal ORDER BY c.pessoa.nome ASC")
     Page<Custodiado> findByUnidadePenal(@Param("unidadePenal") UnidadePenal unidadePenal, Pageable pageable);
+    
+    /**
+     * Lista os custodiados de uma determinada unidade penal com suporte a paginação,
+     * utilizando o ID da unidade penal, ordenados pelo nome da pessoa.
+     * 
+     * @param unidadePenalId O ID da unidade penal
+     * @param pageable Objeto com informações de paginação
+     * @return Página de custodiados da unidade penal especificada
+     */
+    @Query("SELECT c FROM Custodiado c WHERE c.unidadePenal.id = :unidadePenalId ORDER BY c.pessoa.nome ASC")
+    Page<Custodiado> findByUnidadePenalId(@Param("unidadePenalId") Long unidadePenalId, Pageable pageable);
     
     /**
      * Conta o número de custodiados em uma unidade penal específica.
@@ -95,7 +113,7 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     /**
      * Busca custodiados cujo vulgo (apelido) contenha o termo especificado.
      * Esta consulta ignora maiúsculas/minúsculas para facilitar a busca.
-     * Os resultados são retornados ordenados pelo nome da pessoa
+     * Os resultados são retornados ordenados pelo nome da pessoa.
      * 
      * @param vulgo Termo de busca para o vulgo
      * @return Lista de custodiados que atendem ao critério
@@ -112,7 +130,7 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
      */
     @Query("SELECT c FROM Custodiado c WHERE LOWER(c.vulgo) LIKE LOWER(CONCAT('%', :vulgo, '%'))")
     Page<Custodiado> findByVulgoContainingIgnoreCase(@Param("vulgo") String vulgo, Pageable pageable);
-
+    
     /**
      * Busca custodiados pelo nome, ignorando maiúsculas e minúsculas.
      * Os resultados são ordenados pelo nome da pessoa.
@@ -168,14 +186,6 @@ public interface CustodiadoRepository extends JpaRepository<Custodiado, Long> {
     @Query("SELECT DISTINCT c FROM Custodiado c JOIN AgendamentoVisita a ON a.custodiado.id = c.id " +
            "WHERE a.status.descricao <> 'CANCELADO' ORDER BY c.pessoa.nome ASC")
     List<Custodiado> findWithActiveAgendamentos();
-    
-    /**
-     * Verifica se existem custodiados com o número de prontuário fornecido.
-     * 
-     * @param numeroProntuario O número de prontuário a ser verificado
-     * @return true se existir um custodiado com o prontuário informado, false caso contrário
-     */
-    boolean existsByNumeroProntuario(String numeroProntuario);
     
     /**
      * Conta o número de agendamentos ativos por custodiado.

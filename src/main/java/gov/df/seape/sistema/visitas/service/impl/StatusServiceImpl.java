@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do serviço de Status
@@ -34,11 +33,12 @@ public class StatusServiceImpl implements StatusService {
     
     // Lista de status padrão do sistema que não devem ser modificados ou excluídos
     private static final List<String> STATUS_SISTEMA = Arrays.asList(
-            "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO");
+            "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO"
+    );
 
     /**
      * Verifica se o status é um status do sistema.
-     * 
+     *
      * @param descricao Descrição do status
      * @return true se for um status do sistema, false caso contrário
      */
@@ -69,18 +69,20 @@ public class StatusServiceImpl implements StatusService {
     @Transactional
     public StatusResponseDTO criarStatus(StatusRequestDTO statusRequestDTO) {
         log.info("Criando novo status: {}", statusRequestDTO.getDescricao());
-        
+
         // Verificar se já existe um status com esta descrição
         Optional<Status> statusExistente = statusRepository.findByDescricaoIgnoreCase(statusRequestDTO.getDescricao());
         if (statusExistente.isPresent()) {
             log.warn("Tentativa de criar status duplicado: {}", statusRequestDTO.getDescricao());
-            throw new OperacaoInvalidaException("Já existe um status com a descrição: " + statusRequestDTO.getDescricao());
+            throw new OperacaoInvalidaException(
+                    "Já existe um status com a descrição: " + statusRequestDTO.getDescricao()
+            );
         }
-        
+
         Status status = convertToEntity(statusRequestDTO);
         status = statusRepository.save(status);
         log.info("Status criado com sucesso. ID: {}", status.getId());
-        
+
         return convertToResponseDTO(status);
     }
 
@@ -88,28 +90,36 @@ public class StatusServiceImpl implements StatusService {
     @Transactional
     public StatusResponseDTO atualizarStatus(Long id, StatusRequestDTO statusRequestDTO) {
         log.info("Atualizando status com ID: {}", id);
-        
+
         Status statusExistente = statusRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Status não encontrado com ID: " + id));
-        
+
         // Verificar se já existe outro status com esta descrição
-        Optional<Status> statusComMesmaDescricao = statusRepository.findByDescricaoIgnoreCase(statusRequestDTO.getDescricao());
-        if (statusComMesmaDescricao.isPresent() && !statusComMesmaDescricao.get().getId().equals(id)) {
+        Optional<Status> statusComMesmaDescricao =
+                statusRepository.findByDescricaoIgnoreCase(statusRequestDTO.getDescricao());
+
+        if (statusComMesmaDescricao.isPresent()
+                && !statusComMesmaDescricao.get().getId().equals(id)) {
             log.warn("Tentativa de atualizar status com descrição duplicada: {}", statusRequestDTO.getDescricao());
-            throw new OperacaoInvalidaException("Já existe outro status com a descrição: " + statusRequestDTO.getDescricao());
+            throw new OperacaoInvalidaException(
+                    "Já existe outro status com a descrição: " + statusRequestDTO.getDescricao()
+            );
         }
-        
-        // Verificar se é um status do sistema (AGENDADO, CONFIRMADO, REALIZADO, CANCELADO)
+
+        // Verificar se é um status do sistema
         String descricaoOriginal = statusExistente.getDescricao();
-        if (isStatusSistema(descricaoOriginal) && !statusRequestDTO.getDescricao().equalsIgnoreCase(descricaoOriginal)) {
+        if (isStatusSistema(descricaoOriginal)
+                && !statusRequestDTO.getDescricao().equalsIgnoreCase(descricaoOriginal)) {
             log.warn("Tentativa de modificar status do sistema: {} para {}", descricaoOriginal, statusRequestDTO.getDescricao());
-            throw new OperacaoInvalidaException("Não é permitido alterar a descrição de um status do sistema.");
+            throw new OperacaoInvalidaException(
+                    "Não é permitido alterar a descrição de um status do sistema."
+            );
         }
-        
+
         statusExistente.setDescricao(statusRequestDTO.getDescricao().toUpperCase());
         statusExistente = statusRepository.save(statusExistente);
         log.info("Status atualizado com sucesso. ID: {}", statusExistente.getId());
-        
+
         return convertToResponseDTO(statusExistente);
     }
 
@@ -117,51 +127,54 @@ public class StatusServiceImpl implements StatusService {
     @Transactional(readOnly = true)
     public Optional<StatusResponseDTO> buscarStatusPorId(Long id) {
         log.info("Buscando status por ID: {}", id);
-        return statusRepository.findById(id)
-                .map(this::convertToResponseDTO);
+        return statusRepository.findById(id).map(this::convertToResponseDTO);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StatusResponseDTO> listarTodosStatus() {
         log.info("Listando todos os status");
+        // Substituir Collectors.toList() por Stream.toList()
         return statusRepository.findAllOrderByDescricao().stream()
                 .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+                .toList(); // Disponível em Java 16+
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponseDTO<StatusResponseDTO> listarStatusPaginado(Pageable pageable) {
         log.info("Listando status com paginação");
-        Page<Status> pagina = statusRepository.findAll(pageable);
-        Page<StatusResponseDTO> paginaDTO = pagina.map(this::convertToResponseDTO);
-        return new PageResponseDTO<>(paginaDTO);
+
+        // Retorno imediato em vez de usar variável intermediária
+        return new PageResponseDTO<>(
+                statusRepository.findAll(pageable).map(this::convertToResponseDTO)
+        );
     }
 
     @Override
     @Transactional
     public void excluirStatus(Long id) {
         log.info("Excluindo status com ID: {}", id);
-        
+
         Status status = statusRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Status não encontrado com ID: " + id));
-        
+
         // Verificar se é um status do sistema
         if (isStatusSistema(status.getDescricao())) {
             log.warn("Tentativa de excluir status do sistema: {}", status.getDescricao());
             throw new OperacaoInvalidaException("Não é permitido excluir status do sistema.");
         }
-        
+
         // Verificar se há agendamentos com este status
-        long agendamentosComEsteStatus = agendamentoVisitaRepository.countByStatusId(id);
-        if (agendamentosComEsteStatus > 0) {
+        // (Método countByStatusId(Long) precisa existir em AgendamentoVisitaRepository)
+        if (agendamentoVisitaRepository.countByStatusId(id) > 0) {
             log.warn("Tentativa de excluir status em uso: {}", status.getDescricao());
             throw new OperacaoInvalidaException(
-                    "Não é possível excluir este status pois existem " + agendamentosComEsteStatus + 
-                    " agendamentos associados a ele. Atualize os agendamentos antes de excluir o status.");
+                    "Não é possível excluir este status pois existem agendamentos associados a ele. " +
+                    "Atualize os agendamentos antes de excluir o status."
+            );
         }
-        
+
         statusRepository.delete(status);
         log.info("Status excluído com sucesso. ID: {}", id);
     }
@@ -171,11 +184,11 @@ public class StatusServiceImpl implements StatusService {
     public List<StatusResponseDTO> buscarStatusPorDescricao(String descricao) {
         log.info("Buscando status por descrição contendo: {}", descricao);
         
-        // Como não há um método específico no repositório, usamos findAll e filtramos
+        // Também substituindo .collect(Collectors.toList()) por .toList()
         return statusRepository.findAllOrderByDescricao().stream()
                 .filter(status -> status.getDescricao().toLowerCase().contains(descricao.toLowerCase()))
                 .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

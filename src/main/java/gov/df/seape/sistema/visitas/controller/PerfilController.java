@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * Controlador REST para operações relacionadas a Perfis de usuário.
  */
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping("/api/perfis")
 @RequiredArgsConstructor

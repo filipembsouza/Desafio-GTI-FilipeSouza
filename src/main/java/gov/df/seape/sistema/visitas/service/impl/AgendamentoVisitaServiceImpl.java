@@ -199,7 +199,7 @@ public class AgendamentoVisitaServiceImpl implements AgendamentoVisitaService {
             // Remover o agendamento atual da lista de conflitos
             agendamentosVisitante = agendamentosVisitante.stream()
                     .filter(a -> !a.getId().equals(id))
-                    .collect(Collectors.toList());
+                    .toList());
             
             if (!agendamentosVisitante.isEmpty()) {
                 log.warn("Conflito de agendamento detectado para o visitante ID: {}", visitante.getId());

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do serviço de Visitantes
@@ -51,7 +50,6 @@ public class VisitanteServiceImpl implements VisitanteService {
         pessoa.setNome(requestDTO.getNome());
         pessoa.setCpf(requestDTO.getCpf());
         pessoa.setDataNascimento(requestDTO.getDataNascimento());
-        
         pessoa = pessoaRepository.save(pessoa);
         
         // Criar visitante
@@ -93,7 +91,6 @@ public class VisitanteServiceImpl implements VisitanteService {
         pessoa.setNome(requestDTO.getNome());
         pessoa.setCpf(requestDTO.getCpf());
         pessoa.setDataNascimento(requestDTO.getDataNascimento());
-        
         pessoaRepository.save(pessoa);
         
         // Atualizar visitante - senha online só é atualizada se fornecida
@@ -115,11 +112,8 @@ public class VisitanteServiceImpl implements VisitanteService {
         log.info("Listando visitantes com paginação");
         Page<Visitante> pagina = visitanteRepository.findAll(pageable);
         
-        Page<VisitanteResponseDTO> paginaDTO = pagina.map(visitante -> {
-            VisitanteResponseDTO dto = new VisitanteResponseDTO(visitante);
-            return dto;
-        });
-        
+        // Remove variável temporária no map
+        Page<VisitanteResponseDTO> paginaDTO = pagina.map(VisitanteResponseDTO::new);
         return new PageResponseDTO<>(paginaDTO);
     }
 
@@ -129,9 +123,10 @@ public class VisitanteServiceImpl implements VisitanteService {
         log.info("Listando todos os visitantes");
         List<Visitante> visitantes = visitanteRepository.findAll();
         
+        // Substituir collect(Collectors.toList()) por .toList() (Java 16+)
         return visitantes.stream()
                 .map(VisitanteResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -179,8 +174,8 @@ public class VisitanteServiceImpl implements VisitanteService {
         
         // Buscar visitantes pelos IDs encontrados
         Page<Visitante> pagina = visitanteRepository.findByIdIn(visitanteIds, pageable);
-        
         Page<VisitanteResponseDTO> paginaDTO = pagina.map(VisitanteResponseDTO::new);
+        
         return new PageResponseDTO<>(paginaDTO);
     }
 }

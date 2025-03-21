@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do serviço de Usuários
@@ -32,6 +31,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UsuarioServiceImpl implements UsuarioService {
+
+    private static final String PERFIL_NAO_ENCONTRADO = "Perfil não encontrado com ID: ";
+    private static final String USUARIO_NAO_ENCONTRADO = "Usuário não encontrado com ID: ";
 
     private final UsuarioRepository usuarioRepository;
     private final PessoaRepository pessoaRepository;
@@ -59,7 +61,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         
         // Buscar perfil
         Perfil perfil = perfilRepository.findById(requestDTO.getPerfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + requestDTO.getPerfilId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                    PERFIL_NAO_ENCONTRADO + requestDTO.getPerfilId()
+                ));
         
         // Criar pessoa
         Pessoa pessoa = new Pessoa();
@@ -88,7 +92,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.info("Atualizando usuário com ID: {}", id);
         
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(USUARIO_NAO_ENCONTRADO + id));
         
         // Verificar se já existe outro usuário com este email
         usuarioRepository.findByEmail(requestDTO.getEmail())
@@ -110,7 +114,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         
         // Buscar perfil
         Perfil perfil = perfilRepository.findById(requestDTO.getPerfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + requestDTO.getPerfilId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                    PERFIL_NAO_ENCONTRADO + requestDTO.getPerfilId()
+                ));
         
         // Atualizar pessoa
         Pessoa pessoa = usuario.getPessoa();
@@ -153,7 +159,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         
         return usuarios.stream()
                 .map(UsuarioResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -161,7 +167,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponseDTO buscarUsuarioPorId(Long id) {
         log.info("Buscando usuário por ID: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(USUARIO_NAO_ENCONTRADO + id));
         
         return new UsuarioResponseDTO(usuario);
     }
@@ -192,7 +198,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.info("Buscando usuários por perfil ID: {}", perfilId);
         
         if (!perfilRepository.existsById(perfilId)) {
-            throw new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + perfilId);
+            throw new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + perfilId);
         }
         
         Page<Usuario> pagina = usuarioRepository.findByPerfilId(perfilId, pageable);
@@ -211,7 +217,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(USUARIO_NAO_ENCONTRADO + id));
         
         // Verificar se a senha atual está correta
         if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {

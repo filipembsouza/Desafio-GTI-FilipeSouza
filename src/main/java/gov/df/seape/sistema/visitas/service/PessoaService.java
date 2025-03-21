@@ -1,5 +1,6 @@
 package gov.df.seape.sistema.visitas.service;
 
+import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
 import gov.df.seape.sistema.visitas.dto.PessoaRequestDTO;
 import gov.df.seape.sistema.visitas.dto.PessoaResponseDTO;
 import org.springframework.data.domain.Page;
@@ -61,7 +62,7 @@ public interface PessoaService {
      * @param pageable Configurações de paginação
      * @return Página de pessoas
      */
-    Page<PessoaResponseDTO> listarPessoasPaginado(Pageable pageable);
+    PageResponseDTO<PessoaResponseDTO> listarPessoasPaginado(Pageable pageable);
     
     /**
      * Remove uma pessoa pelo seu identificador.
@@ -86,4 +87,6 @@ public interface PessoaService {
      * @return Lista de pessoas nascidas no intervalo
      */
     List<PessoaResponseDTO> buscarPessoaPorIntervaloNascimento(LocalDate dataInicio, LocalDate dataFim);
+
+    PageResponseDTO<PessoaResponseDTO> buscarPessoasPorNome(String nome, Pageable pageable);
 }

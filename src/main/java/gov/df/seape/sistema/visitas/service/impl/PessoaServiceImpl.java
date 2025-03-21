@@ -17,15 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-/**
- * Implementação do serviço de Pessoas
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,138 +34,140 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public PessoaResponseDTO criarPessoa(PessoaRequestDTO requestDTO) {
-        log.info("Criando nova pessoa com CPF: {}", requestDTO.getCpf());
-        
-        // Verificar se já existe pessoa com este CPF
-        if (pessoaRepository.existsByCpf(requestDTO.getCpf())) {
-            log.warn("Tentativa de criar pessoa com CPF já cadastrado: {}", requestDTO.getCpf());
-            throw new OperacaoInvalidaException("Já existe uma pessoa cadastrada com o CPF: " + requestDTO.getCpf());
+    public PessoaResponseDTO criarPessoa(PessoaRequestDTO pessoaRequestDTO) {
+        log.info("Criando nova pessoa com CPF: {}", pessoaRequestDTO.getCpf());
+
+        if (pessoaRepository.existsByCpf(pessoaRequestDTO.getCpf())) {
+            log.warn("Tentativa de criar pessoa com CPF já cadastrado: {}", pessoaRequestDTO.getCpf());
+            throw new OperacaoInvalidaException("Já existe uma pessoa cadastrada com o CPF: " + pessoaRequestDTO.getCpf());
         }
-        
-        // Criar pessoa
+
         Pessoa pessoa = new Pessoa();
-        pessoa.setNome(requestDTO.getNome());
-        pessoa.setCpf(requestDTO.getCpf());
-        pessoa.setDataNascimento(requestDTO.getDataNascimento());
-        
+        pessoa.setNome(pessoaRequestDTO.getNome());
+        pessoa.setCpf(pessoaRequestDTO.getCpf());
+        pessoa.setDataNascimento(pessoaRequestDTO.getDataNascimento());
+
         pessoa = pessoaRepository.save(pessoa);
         log.info("Pessoa criada com sucesso. ID: {}", pessoa.getId());
-        
+
         return convertToPessoaResponseDTO(pessoa);
     }
 
     @Override
     @Transactional
-    public PessoaResponseDTO atualizarPessoa(Long id, PessoaRequestDTO requestDTO) {
+    public PessoaResponseDTO atualizarPessoa(Long id, PessoaRequestDTO pessoaRequestDTO) {
         log.info("Atualizando pessoa com ID: {}", id);
-        
+
         Pessoa pessoa = pessoaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pessoa não encontrada com ID: " + id));
-        
-        // Verificar se já existe outra pessoa com este CPF
-        pessoaRepository.findByCpf(requestDTO.getCpf())
+
+        // Verifica se existe outra pessoa com o mesmo CPF
+        pessoaRepository.findByCpf(pessoaRequestDTO.getCpf())
                 .ifPresent(p -> {
                     if (!p.getId().equals(id)) {
-                        log.warn("Tentativa de atualizar pessoa com CPF já cadastrado: {}", requestDTO.getCpf());
-                        throw new OperacaoInvalidaException("Já existe outra pessoa cadastrada com o CPF: " + requestDTO.getCpf());
+                        log.warn("Tentativa de atualizar pessoa com CPF já cadastrado: {}", pessoaRequestDTO.getCpf());
+                        throw new OperacaoInvalidaException("Já existe outra pessoa cadastrada com o CPF: " + pessoaRequestDTO.getCpf());
                     }
                 });
-        
-        // Atualizar pessoa
-        pessoa.setNome(requestDTO.getNome());
-        pessoa.setCpf(requestDTO.getCpf());
-        pessoa.setDataNascimento(requestDTO.getDataNascimento());
-        
+
+        pessoa.setNome(pessoaRequestDTO.getNome());
+        pessoa.setCpf(pessoaRequestDTO.getCpf());
+        pessoa.setDataNascimento(pessoaRequestDTO.getDataNascimento());
+
         pessoa = pessoaRepository.save(pessoa);
         log.info("Pessoa atualizada com sucesso. ID: {}", pessoa.getId());
-        
+
         return convertToPessoaResponseDTO(pessoa);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<PessoaResponseDTO> listarPessoasPaginadas(Pageable pageable) {
+    public Optional<PessoaResponseDTO> buscarPessoaPorId(Long id) {
+        log.info("Buscando pessoa por ID: {}", id);
+        return pessoaRepository.findById(id)
+                .map(this::convertToPessoaResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PessoaResponseDTO> buscarPessoaPorCpf(String cpf) {
+        log.info("Buscando pessoa por CPF: {}", cpf);
+        return pessoaRepository.findByCpf(cpf)
+                .map(this::convertToPessoaResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PessoaResponseDTO> listarTodasPessoas() {
+        log.info("Listando todas as pessoas");
+        return pessoaRepository.findAll().stream()
+                .map(this::convertToPessoaResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponseDTO<PessoaResponseDTO> listarPessoasPaginado(Pageable pageable) {
         log.info("Listando pessoas com paginação");
         Page<Pessoa> pagina = pessoaRepository.findAll(pageable);
-        
-        Page<PessoaResponseDTO> paginaDTO = pagina.map(this::convertToPessoaResponseDTO);
-        return new PageResponseDTO<>(paginaDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PessoaResponseDTO> listarPessoas() {
-        log.info("Listando todas as pessoas");
-        List<Pessoa> pessoas = pessoaRepository.findAll();
-        
-        return pessoas.stream()
-                .map(this::convertToPessoaResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PessoaResponseDTO buscarPessoaPorId(Long id) {
-        log.info("Buscando pessoa por ID: {}", id);
-        Pessoa pessoa = pessoaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pessoa não encontrada com ID: " + id));
-        
-        return convertToPessoaResponseDTO(pessoa);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PessoaResponseDTO buscarPessoaPorCpf(String cpf) {
-        log.info("Buscando pessoa por CPF: {}", cpf);
-        Pessoa pessoa = pessoaRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pessoa não encontrada com CPF: " + cpf));
-        
-        return convertToPessoaResponseDTO(pessoa);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponseDTO<PessoaResponseDTO> buscarPessoasPorNome(String nome, Pageable pageable) {
-        log.info("Buscando pessoas por nome contendo: {}", nome);
-        Page<Pessoa> pagina = pessoaRepository.findByNomeContainingIgnoreCase(nome, pageable);
-        
-        Page<PessoaResponseDTO> paginaDTO = pagina.map(this::convertToPessoaResponseDTO);
-        return new PageResponseDTO<>(paginaDTO);
+        return new PageResponseDTO<>(pagina.map(this::convertToPessoaResponseDTO));
     }
 
     @Override
     @Transactional
     public void excluirPessoa(Long id) {
         log.info("Excluindo pessoa com ID: {}", id);
-        
         Pessoa pessoa = pessoaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pessoa não encontrada com ID: " + id));
-        
-        // Verificar se a pessoa está vinculada a um custodiado
+
+        // Verifica se a pessoa está vinculada a um custodiado, visitante ou usuário
         if (custodiadoRepository.findByPessoaId(id).isPresent()) {
             log.warn("Tentativa de excluir pessoa vinculada a um custodiado. ID: {}", id);
             throw new OperacaoInvalidaException("Não é possível excluir esta pessoa pois está vinculada a um custodiado.");
         }
-        
-        // Verificar se a pessoa está vinculada a um visitante
         if (visitanteRepository.findByPessoaId(id).isPresent()) {
             log.warn("Tentativa de excluir pessoa vinculada a um visitante. ID: {}", id);
             throw new OperacaoInvalidaException("Não é possível excluir esta pessoa pois está vinculada a um visitante.");
         }
-        
-        // Verificar se a pessoa está vinculada a um usuário
         if (usuarioRepository.findByPessoaId(id).isPresent()) {
             log.warn("Tentativa de excluir pessoa vinculada a um usuário. ID: {}", id);
             throw new OperacaoInvalidaException("Não é possível excluir esta pessoa pois está vinculada a um usuário.");
         }
-        
+
         pessoaRepository.delete(pessoa);
         log.info("Pessoa excluída com sucesso. ID: {}", id);
     }
-    
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PessoaResponseDTO> buscarPessoaPorNome(String nome) {
+        log.info("Buscando pessoas por nome: {}", nome);
+        // Supondo que o repositório possua um método que retorne List<Pessoa>
+        return pessoaRepository.findByNomeContainingIgnoreCase(nome).stream()
+                .map(this::convertToPessoaResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PessoaResponseDTO> buscarPessoaPorIntervaloNascimento(LocalDate dataInicio, LocalDate dataFim) {
+        log.info("Buscando pessoas por intervalo de data de nascimento entre {} e {}", dataInicio, dataFim);
+        // Supondo que o repositório possua um método que retorne List<Pessoa>
+        return pessoaRepository.findByDataNascimentoBetween(dataInicio, dataFim).stream()
+                .map(this::convertToPessoaResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponseDTO<PessoaResponseDTO> buscarPessoasPorNome(String nome, Pageable pageable) {
+        log.info("Buscando pessoas por nome com paginação: {}", nome);
+        Page<Pessoa> pagina = pessoaRepository.findByNomeContainingIgnoreCase(nome, pageable);
+        return new PageResponseDTO<>(pagina.map(this::convertToPessoaResponseDTO));
+    }
+
     /**
-     * Converte entidade Pessoa para PessoaResponseDTO
+     * Converte a entidade Pessoa para PessoaResponseDTO.
      */
     private PessoaResponseDTO convertToPessoaResponseDTO(Pessoa pessoa) {
         PessoaResponseDTO dto = new PessoaResponseDTO();
@@ -177,13 +175,10 @@ public class PessoaServiceImpl implements PessoaService {
         dto.setNome(pessoa.getNome());
         dto.setCpf(pessoa.getCpf());
         dto.setDataNascimento(pessoa.getDataNascimento());
-        
-        // Calcular idade
         if (pessoa.getDataNascimento() != null) {
             int idade = Period.between(pessoa.getDataNascimento(), LocalDate.now()).getYears();
             dto.setIdade(idade);
         }
-        
         return dto;
     }
 }

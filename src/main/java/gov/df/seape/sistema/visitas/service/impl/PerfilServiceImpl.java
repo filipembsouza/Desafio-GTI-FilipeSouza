@@ -1,233 +1,206 @@
 package gov.df.seape.sistema.visitas.service.impl;
 
 import gov.df.seape.sistema.visitas.dto.PageResponseDTO;
-import gov.df.seape.sistema.visitas.dto.UsuarioRequestDTO;
-import gov.df.seape.sistema.visitas.dto.UsuarioResponseDTO;
-import gov.df.seape.sistema.visitas.exception.OperacaoInvalidaException;
+import gov.df.seape.sistema.visitas.dto.PerfilRequestDTO;
+import gov.df.seape.sistema.visitas.dto.PerfilResponseDTO;
 import gov.df.seape.sistema.visitas.exception.RecursoNaoEncontradoException;
+import gov.df.seape.sistema.visitas.model.Funcionalidade;
 import gov.df.seape.sistema.visitas.model.Perfil;
-import gov.df.seape.sistema.visitas.model.Pessoa;
-import gov.df.seape.sistema.visitas.model.Usuario;
-import gov.df.seape.sistema.visitas.repository.CustodiadoRepository;
+import gov.df.seape.sistema.visitas.repository.FuncionalidadeRepository;
 import gov.df.seape.sistema.visitas.repository.PerfilRepository;
-import gov.df.seape.sistema.visitas.repository.PessoaRepository;
-import gov.df.seape.sistema.visitas.repository.UsuarioRepository;
-import gov.df.seape.sistema.visitas.repository.VisitanteRepository;
-import gov.df.seape.sistema.visitas.service.UsuarioService;
+import gov.df.seape.sistema.visitas.service.PerfilService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Implementação do serviço de Usuários
+ * Implementação do serviço de Perfis de usuário.
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UsuarioServiceImpl implements UsuarioService {
+public class PerfilServiceImpl implements PerfilService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PessoaRepository pessoaRepository;
+    private static final String PERFIL_NAO_ENCONTRADO = "Perfil não encontrado com ID: ";
+
     private final PerfilRepository perfilRepository;
-    private final CustodiadoRepository custodiadoRepository;
-    private final VisitanteRepository visitanteRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final FuncionalidadeRepository funcionalidadeRepository;
 
+    /**
+     * Criar um novo perfil.
+     *
+     * @param requestDTO Dados do perfil a ser criado
+     * @return O perfil criado, com ID gerado
+     */
     @Override
     @Transactional
-    public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO requestDTO) {
-        log.info("Criando novo usuário com email: {}", requestDTO.getEmail());
-        
-        // Verificar se já existe usuário com este email
-        if (usuarioRepository.existsByEmail(requestDTO.getEmail())) {
-            log.warn("Tentativa de criar usuário com email já cadastrado: {}", requestDTO.getEmail());
-            throw new OperacaoInvalidaException("Já existe um usuário cadastrado com o email: " + requestDTO.getEmail());
-        }
-        
-        // Verificar se já existe pessoa com o CPF informado
-        if (pessoaRepository.existsByCpf(requestDTO.getPessoa().getCpf())) {
-            log.warn("Tentativa de criar usuário com CPF já cadastrado: {}", requestDTO.getPessoa().getCpf());
-            throw new OperacaoInvalidaException("Já existe uma pessoa cadastrada com o CPF: " + requestDTO.getPessoa().getCpf());
-        }
-        
-        // Buscar perfil
-        Perfil perfil = perfilRepository.findById(requestDTO.getPerfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + requestDTO.getPerfilId()));
-        
-        // Criar pessoa
-        Pessoa pessoa = new Pessoa();
-        pessoa.setNome(requestDTO.getPessoa().getNome());
-        pessoa.setCpf(requestDTO.getPessoa().getCpf());
-        pessoa.setDataNascimento(requestDTO.getPessoa().getDataNascimento());
-        
-        pessoa = pessoaRepository.save(pessoa);
-        
-        // Criar usuário
-        Usuario usuario = new Usuario();
-        usuario.setEmail(requestDTO.getEmail());
-        usuario.setSenha(passwordEncoder.encode(requestDTO.getSenha())); // Criptografar senha
-        usuario.setPerfil(perfil);
-        usuario.setPessoa(pessoa);
-        
-        usuario = usuarioRepository.save(usuario);
-        log.info("Usuário criado com sucesso. ID: {}", usuario.getId());
-        
-        return new UsuarioResponseDTO(usuario);
+    public PerfilResponseDTO criarPerfil(PerfilRequestDTO requestDTO) {
+        log.info("Criando novo perfil com nome: {}", requestDTO.getNome());
+
+        // Mapeia o campo "nome" do DTO para a propriedade "descricao" do Perfil
+        Perfil perfil = new Perfil();
+        perfil.setDescricao(requestDTO.getNome());
+        perfil = perfilRepository.save(perfil);
+
+        log.info("Perfil criado com sucesso. ID: {}", perfil.getId());
+        return convertToDTO(perfil);
     }
 
+    /**
+     * Atualizar um perfil existente.
+     *
+     * @param id         ID do perfil a ser atualizado
+     * @param requestDTO Novos dados do perfil
+     * @return O perfil atualizado
+     */
     @Override
     @Transactional
-    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioRequestDTO requestDTO) {
-        log.info("Atualizando usuário com ID: {}", id);
-        
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
-        
-        // Verificar se já existe outro usuário com este email
-        usuarioRepository.findByEmail(requestDTO.getEmail())
-                .ifPresent(u -> {
-                    if (!u.getId().equals(id)) {
-                        log.warn("Tentativa de atualizar usuário com email já cadastrado: {}", requestDTO.getEmail());
-                        throw new OperacaoInvalidaException("Já existe outro usuário cadastrado com o email: " + requestDTO.getEmail());
-                    }
-                });
-        
-        // Verificar se já existe outra pessoa com este CPF
-        pessoaRepository.findByCpf(requestDTO.getPessoa().getCpf())
-                .ifPresent(p -> {
-                    if (!p.getId().equals(usuario.getPessoa().getId())) {
-                        log.warn("Tentativa de atualizar usuário com CPF já cadastrado: {}", requestDTO.getPessoa().getCpf());
-                        throw new OperacaoInvalidaException("Já existe outra pessoa cadastrada com o CPF: " + requestDTO.getPessoa().getCpf());
-                    }
-                });
-        
-        // Buscar perfil
-        Perfil perfil = perfilRepository.findById(requestDTO.getPerfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + requestDTO.getPerfilId()));
-        
-        // Atualizar pessoa
-        Pessoa pessoa = usuario.getPessoa();
-        pessoa.setNome(requestDTO.getPessoa().getNome());
-        pessoa.setCpf(requestDTO.getPessoa().getCpf());
-        pessoa.setDataNascimento(requestDTO.getPessoa().getDataNascimento());
-        
-        pessoaRepository.save(pessoa);
-        
-        // Atualizar usuário
-        usuario.setEmail(requestDTO.getEmail());
-        usuario.setPerfil(perfil);
-        
-        // Senha só é atualizada se for fornecida
-        if (requestDTO.getSenha() != null && !requestDTO.getSenha().isEmpty()) {
-            usuario.setSenha(passwordEncoder.encode(requestDTO.getSenha()));
-        }
-        
-        usuario = usuarioRepository.save(usuario);
-        log.info("Usuário atualizado com sucesso. ID: {}", usuario.getId());
-        
-        return new UsuarioResponseDTO(usuario);
+    public PerfilResponseDTO atualizarPerfil(Long id, PerfilRequestDTO requestDTO) {
+        log.info("Atualizando perfil com ID: {}", id);
+
+        Perfil perfil = perfilRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + id));
+
+        perfil.setDescricao(requestDTO.getNome());
+        perfil = perfilRepository.save(perfil);
+
+        log.info("Perfil atualizado com sucesso. ID: {}", perfil.getId());
+        return convertToDTO(perfil);
     }
 
+    /**
+     * Buscar todos os perfis com paginação.
+     *
+     * @param pageable Configurações de paginação
+     * @return Página de perfis
+     */
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<UsuarioResponseDTO> listarUsuariosPaginados(Pageable pageable) {
-        log.info("Listando usuários com paginação");
-        Page<Usuario> pagina = usuarioRepository.findAll(pageable);
-        
-        Page<UsuarioResponseDTO> paginaDTO = pagina.map(UsuarioResponseDTO::new);
+    public PageResponseDTO<PerfilResponseDTO> listarPerfisPaginados(Pageable pageable) {
+        log.info("Listando perfis com paginação");
+        Page<Perfil> pagina = perfilRepository.findAll(pageable);
+        Page<PerfilResponseDTO> paginaDTO = pagina.map(this::convertToDTO);
         return new PageResponseDTO<>(paginaDTO);
     }
 
+    /**
+     * Buscar todos os perfis.
+     *
+     * @return Lista de todos os perfis
+     */
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioResponseDTO> listarUsuarios() {
-        log.info("Listando todos os usuários");
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        
-        return usuarios.stream()
-                .map(UsuarioResponseDTO::new)
-                .collect(Collectors.toList());
+    public List<PerfilResponseDTO> listarPerfis() {
+        log.info("Listando todos os perfis");
+        List<Perfil> perfis = perfilRepository.findAllOrderByDescricao();
+        return perfis.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
+    /**
+     * Buscar um perfil específico pelo ID.
+     *
+     * @param id ID do perfil a ser buscado
+     * @return O perfil encontrado
+     */
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDTO buscarUsuarioPorId(Long id) {
-        log.info("Buscando usuário por ID: {}", id);
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
-        
-        return new UsuarioResponseDTO(usuario);
+    public PerfilResponseDTO buscarPerfilPorId(Long id) {
+        log.info("Buscando perfil por ID: {}", id);
+
+        Perfil perfil = perfilRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + id));
+
+        return convertToDTO(perfil);
     }
 
+    /**
+     * Buscar perfis por descrição.
+     *
+     * @param descricao Descrição ou parte da descrição
+     * @param pageable  Configurações de paginação
+     * @return Página de perfis que contêm a descrição especificada
+     */
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDTO buscarPorEmail(String email) {
-        log.info("Buscando usuário por email: {}", email);
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com email: " + email));
-        
-        return new UsuarioResponseDTO(usuario);
-    }
+    public PageResponseDTO<PerfilResponseDTO> buscarPorDescricao(String descricao, Pageable pageable) {
+        log.info("Buscando perfis por descrição contendo: {}", descricao);
 
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponseDTO<UsuarioResponseDTO> buscarPorNome(String nome, Pageable pageable) {
-        log.info("Buscando usuários por nome contendo: {}", nome);
-        Page<Usuario> pagina = usuarioRepository.findByNomeContainingIgnoreCase(nome, pageable);
-        
-        Page<UsuarioResponseDTO> paginaDTO = pagina.map(UsuarioResponseDTO::new);
+        Page<Perfil> pagina = perfilRepository.findByDescricaoContainingIgnoreCase(descricao, pageable);
+        Page<PerfilResponseDTO> paginaDTO = pagina.map(this::convertToDTO);
         return new PageResponseDTO<>(paginaDTO);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponseDTO<UsuarioResponseDTO> buscarPorPerfil(Long perfilId, Pageable pageable) {
-        log.info("Buscando usuários por perfil ID: {}", perfilId);
-        
-        if (!perfilRepository.existsById(perfilId)) {
-            throw new RecursoNaoEncontradoException("Perfil não encontrado com ID: " + perfilId);
-        }
-        
-        Page<Usuario> pagina = usuarioRepository.findByPerfilId(perfilId, pageable);
-        
-        Page<UsuarioResponseDTO> paginaDTO = pagina.map(UsuarioResponseDTO::new);
-        return new PageResponseDTO<>(paginaDTO);
-    }
-
+    /**
+     * Adicionar funcionalidades a um perfil.
+     *
+     * @param perfilId           ID do perfil
+     * @param funcionalidadeIds  Lista de IDs de funcionalidades a serem adicionadas
+     * @return O perfil atualizado com as novas funcionalidades
+     */
     @Override
     @Transactional
-    public UsuarioResponseDTO alterarSenha(Long id, String senhaAtual, String novaSenha) {
-        log.info("Alterando senha do usuário com ID: {}", id);
-        
-        if (senhaAtual == null || novaSenha == null || senhaAtual.isEmpty() || novaSenha.isEmpty()) {
-            throw new OperacaoInvalidaException("Senhas atual e nova devem ser informadas");
+    public PerfilResponseDTO adicionarFuncionalidades(Long perfilId, List<Long> funcionalidadeIds) {
+        log.info("Adicionando funcionalidades ao perfil com ID: {}", perfilId);
+
+        Perfil perfil = perfilRepository.findById(perfilId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + perfilId));
+
+        for (Long funcId : funcionalidadeIds) {
+            Funcionalidade funcionalidade = funcionalidadeRepository.findById(funcId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Funcionalidade não encontrada com ID: " + funcId));
+            perfil.adicionarFuncionalidade(funcionalidade);
         }
-        
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
-        
-        // Verificar se a senha atual está correta
-        if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
-            log.warn("Tentativa de alteração de senha com senha atual incorreta. Usuário ID: {}", id);
-            throw new OperacaoInvalidaException("Senha atual incorreta");
-        }
-        
-        // Verifica se a nova senha é igual à atual
-        if (passwordEncoder.matches(novaSenha, usuario.getSenha())) {
-            throw new OperacaoInvalidaException("A nova senha não pode ser igual à senha atual");
-        }
-        
-        usuario.setSenha(passwordEncoder.encode(novaSenha));
-        usuario = usuarioRepository.save(usuario);
-        log.info("Senha alterada com sucesso. Usuário ID: {}", usuario.getId());
-        
-        return new UsuarioResponseDTO(usuario);
+        perfil = perfilRepository.save(perfil);
+
+        log.info("Funcionalidades adicionadas com sucesso ao perfil com ID: {}", perfil.getId());
+        return convertToDTO(perfil);
+    }
+
+    /**
+     * Remover funcionalidades de um perfil.
+     *
+     * @param perfilId           ID do perfil
+     * @param funcionalidadeIds  Lista de IDs de funcionalidades a serem removidas
+     * @return O perfil atualizado
+     */
+    @Override
+    @Transactional
+    public PerfilResponseDTO removerFuncionalidades(Long perfilId, List<Long> funcionalidadeIds) {
+        log.info("Removendo funcionalidades do perfil com ID: {}", perfilId);
+
+        Perfil perfil = perfilRepository.findById(perfilId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(PERFIL_NAO_ENCONTRADO + perfilId));
+
+        // Remove os vínculos que possuam os IDs de funcionalidades informados
+        perfil.getVinculos().removeIf(vinculo -> funcionalidadeIds.contains(vinculo.getFuncionalidade().getId()));
+        perfil = perfilRepository.save(perfil);
+
+        log.info("Funcionalidades removidas com sucesso do perfil com ID: {}", perfil.getId());
+        return convertToDTO(perfil);
+    }
+
+    /**
+     * Método auxiliar para converter a entidade Perfil em PerfilResponseDTO.
+     * Como Perfil possui apenas a propriedade "descricao", mapeamos "nome" do DTO para "descricao".
+     * Os demais campos (CPF, dataNascimento, idade) são deixados em branco (null).
+     *
+     * @param perfil A entidade Perfil a ser convertida
+     * @return Objeto PerfilResponseDTO preenchido
+     */
+    private PerfilResponseDTO convertToDTO(Perfil perfil) {
+        PerfilResponseDTO dto = new PerfilResponseDTO();
+        dto.setId(perfil.getId());
+        dto.setNome(perfil.getDescricao());
+        dto.setCpf(null);
+        dto.setDataNascimento(null);
+        dto.setIdade(null);
+        return dto;
     }
 }

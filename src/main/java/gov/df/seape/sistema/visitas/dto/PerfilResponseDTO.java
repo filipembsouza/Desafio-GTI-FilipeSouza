@@ -1,33 +1,37 @@
 package gov.df.seape.sistema.visitas.dto;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 import gov.df.seape.sistema.visitas.model.Perfil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class PerfilResponseDTO {
-    
     private Long id;
-    private String descricao;
-    private List<FuncionalidadeResponseDTO> funcionalidades;
+    private String nome;
+    private String cpf;
+    private LocalDate dataNascimento;
+    private Integer idade;
     
-    public PerfilResponseDTO(Perfil perfil) {
-        this.id = perfil.getId();
-        this.descricao = perfil.getDescricao();
-        
-        // Recupera funcionalidades a partir dos vínculos (método getFuncionalidades() em Perfil)
-        if (perfil.getFuncionalidades() != null) {
-            this.funcionalidades = perfil.getFuncionalidades().stream()
-                .map(FuncionalidadeResponseDTO::new)
-                .toList(); // Usando toList() que retorna uma lista imutável
-        } else {
-            this.funcionalidades = new ArrayList<>();
+    public PerfilResponseDTO(Long id, String nome, String cpf, LocalDate dataNascimento, Integer idade) {
+        this.id = id;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.dataNascimento = dataNascimento;
+        this.idade = idade;
+        calcularIdade();
+    }
+    
+    public void calcularIdade() {
+        if (this.dataNascimento != null) {
+            this.idade = Period.between(this.dataNascimento, LocalDate.now()).getYears();
         }
+    }
+
+    public PerfilResponseDTO(Perfil perfil) {
+     
     }
 }

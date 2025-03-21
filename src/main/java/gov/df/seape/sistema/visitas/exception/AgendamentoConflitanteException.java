@@ -2,6 +2,7 @@ package gov.df.seape.sistema.visitas.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import java.io.Serial;
 
 /**
  * Exceção especializada para representar conflitos em agendamentos de visitas.
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ResponseStatus(HttpStatus.CONFLICT)
 public class AgendamentoConflitanteException extends RuntimeException {
+    
+    @Serial
+    private static final long serialVersionUID = 1L;
     
     /**
      * Código identificador do tipo específico de conflito de agendamento.
@@ -42,7 +46,7 @@ public class AgendamentoConflitanteException extends RuntimeException {
      */
     public AgendamentoConflitanteException(String mensagem, String codigoConflito) {
         super(mensagem);
-        this.codigoConflito = codigoConflito;
+        this.codigoConflito = codigoConflito != null ? codigoConflito : "CONFLITO_AGENDAMENTO_GENERICO";
     }
 
     /**
@@ -54,6 +58,18 @@ public class AgendamentoConflitanteException extends RuntimeException {
     public AgendamentoConflitanteException(String mensagem, Throwable causa) {
         super(mensagem, causa);
         this.codigoConflito = "CONFLITO_AGENDAMENTO_COM_CAUSA";
+    }
+    
+    /**
+     * Construtor que permite especificar um código de conflito e incluir a causa original.
+     * 
+     * @param mensagem Descrição detalhada do conflito de agendamento
+     * @param causa Exceção original que motivou este conflito
+     * @param codigoConflito Código específico para identificação do tipo de conflito
+     */
+    public AgendamentoConflitanteException(String mensagem, Throwable causa, String codigoConflito) {
+        super(mensagem, causa);
+        this.codigoConflito = codigoConflito != null ? codigoConflito : "CONFLITO_AGENDAMENTO_COM_CAUSA";
     }
 
     /**

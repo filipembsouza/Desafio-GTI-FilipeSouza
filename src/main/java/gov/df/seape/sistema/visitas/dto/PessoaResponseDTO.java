@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@SuppressWarnings("unused")
 @Data
 @NoArgsConstructor
 public class PessoaResponseDTO {

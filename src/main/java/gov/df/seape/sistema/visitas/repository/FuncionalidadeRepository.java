@@ -37,7 +37,7 @@ public interface FuncionalidadeRepository extends JpaRepository<Funcionalidade, 
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.authority) = LOWER(:authority)")
     Optional<Funcionalidade> findByAuthorityIgnoreCase(@Param("authority") String authority);
-
+    
     /**
      * Lista todas as funcionalidades cadastradas, ordenadas alfabeticamente pela descrição.
      *
@@ -63,7 +63,7 @@ public interface FuncionalidadeRepository extends JpaRepository<Funcionalidade, 
      * em blocos gerenciáveis e oferecer navegação entre páginas.
      * 
      * @param descricao Termo de busca para a descrição da funcionalidade
-     * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
+     * @param pageable  Objeto com informações de paginação (página, tamanho, ordenação)
      * @return Página de funcionalidades que contêm o termo na descrição
      */
     @Query("SELECT f FROM Funcionalidade f WHERE LOWER(f.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")

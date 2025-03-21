@@ -7,7 +7,6 @@ import gov.df.seape.sistema.visitas.exception.OperacaoInvalidaException;
 import gov.df.seape.sistema.visitas.exception.RecursoNaoEncontradoException;
 import gov.df.seape.sistema.visitas.model.Funcionalidade;
 import gov.df.seape.sistema.visitas.repository.FuncionalidadeRepository;
-import gov.df.seape.sistema.visitas.repository.VincPerfilFuncionalidadeRepository;
 import gov.df.seape.sistema.visitas.service.FuncionalidadeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do serviço de Funcionalidades
@@ -28,20 +26,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FuncionalidadeServiceImpl implements FuncionalidadeService {
 
+    private static final String FUNC_NAO_ENCONTRADA = "Funcionalidade não encontrada com ID: ";
+
     private final FuncionalidadeRepository funcionalidadeRepository;
-    private final VincPerfilFuncionalidadeRepository vincPerfilFuncionalidadeRepository;
-    
+    // Removido, pois não está sendo utilizado:
+    // private final VincPerfilFuncionalidadeRepository vincPerfilFuncionalidadeRepository;
+
     // Lista de funcionalidades essenciais do sistema que não devem ser modificadas ou excluídas
     private static final List<String> FUNCIONALIDADES_SISTEMA = Arrays.asList(
             "api.agendamentos.create",
             "api.agendamentos.read",
             "api.agendamentos.update",
             "api.agendamentos.cancel",
-            "api.usuarios.*");
+            "api.usuarios.*"
+    );
 
     /**
      * Verifica se a funcionalidade é essencial para o sistema.
-     * 
+     *
      * @param authority Authority da funcionalidade
      * @return true se for uma funcionalidade essencial, false caso contrário
      */
@@ -53,26 +55,26 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     @Transactional
     public FuncionalidadeResponseDTO criarFuncionalidade(FuncionalidadeRequestDTO requestDTO) {
         log.info("Criando nova funcionalidade: {}", requestDTO.getDescricao());
-        
+
         // Verificar se já existe funcionalidade com esta descrição
         if (funcionalidadeRepository.findByDescricaoIgnoreCase(requestDTO.getDescricao()).isPresent()) {
             log.warn("Tentativa de criar funcionalidade com descrição duplicada: {}", requestDTO.getDescricao());
             throw new OperacaoInvalidaException("Já existe uma funcionalidade com a descrição: " + requestDTO.getDescricao());
         }
-        
+
         // Verificar se já existe funcionalidade com esta authority
         if (funcionalidadeRepository.findByAuthorityIgnoreCase(requestDTO.getAuthority()).isPresent()) {
             log.warn("Tentativa de criar funcionalidade com authority duplicada: {}", requestDTO.getAuthority());
             throw new OperacaoInvalidaException("Já existe uma funcionalidade com a authority: " + requestDTO.getAuthority());
         }
-        
+
         Funcionalidade funcionalidade = new Funcionalidade();
         funcionalidade.setDescricao(requestDTO.getDescricao());
         funcionalidade.setAuthority(requestDTO.getAuthority());
-        
+
         funcionalidade = funcionalidadeRepository.save(funcionalidade);
         log.info("Funcionalidade criada com sucesso. ID: {}", funcionalidade.getId());
-        
+
         return new FuncionalidadeResponseDTO(funcionalidade);
     }
 
@@ -80,16 +82,16 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     @Transactional
     public FuncionalidadeResponseDTO atualizarFuncionalidade(Long id, FuncionalidadeRequestDTO requestDTO) {
         log.info("Atualizando funcionalidade com ID: {}", id);
-        
+
         Funcionalidade funcionalidade = funcionalidadeRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Funcionalidade não encontrada com ID: " + id));
-        
+                .orElseThrow(() -> new RecursoNaoEncontradoException(FUNC_NAO_ENCONTRADA + id));
+
         // Verificar se é uma funcionalidade do sistema
         if (isFuncionalidadeSistema(funcionalidade.getAuthority())) {
             log.warn("Tentativa de modificar funcionalidade do sistema: {}", funcionalidade.getAuthority());
             throw new OperacaoInvalidaException("Não é permitido modificar funcionalidades essenciais do sistema.");
         }
-        
+
         // Verificar se já existe outra funcionalidade com esta descrição
         funcionalidadeRepository.findByDescricaoIgnoreCase(requestDTO.getDescricao())
                 .ifPresent(f -> {
@@ -98,7 +100,7 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
                         throw new OperacaoInvalidaException("Já existe outra funcionalidade com a descrição: " + requestDTO.getDescricao());
                     }
                 });
-        
+
         // Verificar se já existe outra funcionalidade com esta authority
         funcionalidadeRepository.findByAuthorityIgnoreCase(requestDTO.getAuthority())
                 .ifPresent(f -> {
@@ -107,13 +109,13 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
                         throw new OperacaoInvalidaException("Já existe outra funcionalidade com a authority: " + requestDTO.getAuthority());
                     }
                 });
-        
+
         funcionalidade.setDescricao(requestDTO.getDescricao());
         funcionalidade.setAuthority(requestDTO.getAuthority());
-        
+
         funcionalidade = funcionalidadeRepository.save(funcionalidade);
         log.info("Funcionalidade atualizada com sucesso. ID: {}", funcionalidade.getId());
-        
+
         return new FuncionalidadeResponseDTO(funcionalidade);
     }
 
@@ -122,7 +124,7 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public PageResponseDTO<FuncionalidadeResponseDTO> listarFuncionalidadesPaginadas(Pageable pageable) {
         log.info("Listando funcionalidades com paginação");
         Page<Funcionalidade> pagina = funcionalidadeRepository.findAll(pageable);
-        
+
         Page<FuncionalidadeResponseDTO> paginaDTO = pagina.map(FuncionalidadeResponseDTO::new);
         return new PageResponseDTO<>(paginaDTO);
     }
@@ -132,10 +134,10 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public List<FuncionalidadeResponseDTO> listarFuncionalidades() {
         log.info("Listando todas as funcionalidades");
         List<Funcionalidade> funcionalidades = funcionalidadeRepository.findAllOrderByDescricao();
-        
+
         return funcionalidades.stream()
                 .map(FuncionalidadeResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -143,8 +145,8 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public FuncionalidadeResponseDTO buscarFuncionalidadePorId(Long id) {
         log.info("Buscando funcionalidade por ID: {}", id);
         Funcionalidade funcionalidade = funcionalidadeRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Funcionalidade não encontrada com ID: " + id));
-        
+                .orElseThrow(() -> new RecursoNaoEncontradoException(FUNC_NAO_ENCONTRADA + id));
+
         return new FuncionalidadeResponseDTO(funcionalidade);
     }
 
@@ -153,7 +155,7 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public PageResponseDTO<FuncionalidadeResponseDTO> buscarPorDescricao(String descricao, Pageable pageable) {
         log.info("Buscando funcionalidades por descrição contendo: {}", descricao);
         Page<Funcionalidade> pagina = funcionalidadeRepository.findByDescricaoContainingIgnoreCase(descricao, pageable);
-        
+
         Page<FuncionalidadeResponseDTO> paginaDTO = pagina.map(FuncionalidadeResponseDTO::new);
         return new PageResponseDTO<>(paginaDTO);
     }
@@ -162,15 +164,10 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     @Transactional(readOnly = true)
     public PageResponseDTO<FuncionalidadeResponseDTO> buscarPorAuthority(String authority, Pageable pageable) {
         log.info("Buscando funcionalidades por authority contendo: {}", authority);
-        
-        // Como não há método específico no repositório, usamos uma consulta personalizada
-        Page<Funcionalidade> pagina = funcionalidadeRepository.findAll((root, query, criteriaBuilder) -> {
-            return criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("authority")),
-                    "%" + authority.toLowerCase() + "%"
-            );
-        }, pageable);
-        
+
+        // Em vez de usar Specification, utilize o método customizado no repositório:
+        Page<Funcionalidade> pagina = funcionalidadeRepository.findByAuthorityContainingIgnoreCase(authority, pageable);
+
         Page<FuncionalidadeResponseDTO> paginaDTO = pagina.map(FuncionalidadeResponseDTO::new);
         return new PageResponseDTO<>(paginaDTO);
     }
@@ -180,10 +177,10 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public List<FuncionalidadeResponseDTO> buscarPorPerfil(Long perfilId) {
         log.info("Buscando funcionalidades por perfil ID: {}", perfilId);
         List<Funcionalidade> funcionalidades = funcionalidadeRepository.findByPerfilId(perfilId);
-        
+
         return funcionalidades.stream()
                 .map(FuncionalidadeResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -191,9 +188,9 @@ public class FuncionalidadeServiceImpl implements FuncionalidadeService {
     public List<FuncionalidadeResponseDTO> buscarNaoAssociadasAoPerfil(Long perfilId) {
         log.info("Buscando funcionalidades não associadas ao perfil ID: {}", perfilId);
         List<Funcionalidade> funcionalidades = funcionalidadeRepository.findNotInPerfil(perfilId);
-        
+
         return funcionalidades.stream()
                 .map(FuncionalidadeResponseDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

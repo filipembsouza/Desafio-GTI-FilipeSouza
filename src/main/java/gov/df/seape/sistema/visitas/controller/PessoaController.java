@@ -45,7 +45,8 @@ public class PessoaController {
     @GetMapping("/paginado")
     @Operation(summary = "Listar pessoas paginadas", description = "Lista todas as pessoas com paginação")
     public ResponseEntity<PageResponseDTO<PessoaResponseDTO>> listarPessoasPaginadas(Pageable pageable) {
-        PageResponseDTO<PessoaResponseDTO> pageResponseDTO = (PageResponseDTO<PessoaResponseDTO>) pessoaService.listarPessoasPaginado(pageable);
+        PageResponseDTO<PessoaResponseDTO> pageResponseDTO = pessoaService.listarPessoasPaginado(pageable);
+
         return ResponseEntity.ok(pageResponseDTO);
     }
 

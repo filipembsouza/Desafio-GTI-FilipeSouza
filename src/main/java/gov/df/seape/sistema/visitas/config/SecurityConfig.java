@@ -31,120 +31,108 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Configuração centralizada de segurança para o Sistema de Visitas Prisionais.
- * 
- * Esta classe define a estratégia de segurança para a aplicação, incluindo:
- * - Configuração de filtros de segurança
- * - Gerenciamento de clientes OAuth2
- * - Definição de usuários em memória
- * - Configuração de codificação de senhas
  */
 @Configuration
 @EnableWebSecurity
 @Slf4j
 public class SecurityConfig {
 
+    // Constantes para manter padronização e evitar literais duplicados
+    private static final String ISSUER_URL = "http://localhost:8080";
+    private static final String CLIENT_ID = "api-client";
+    private static final String CLIENT_SECRET = "secret";
+    private static final String REDIRECT_URI_SWAGGER = "http://localhost:8080/swagger-ui/oauth2-redirect.html";
+    private static final String SCOPE_READ = "api.read";
+    private static final String SCOPE_WRITE = "api.write";
+
     /**
-     * Configura o filtro de segurança para o servidor de autorização OAuth2.
-     * 
-     * Este método define as configurações de segurança específicas para o 
-     * processo de autorização, incluindo tratamento de exceções de autenticação.
-     * 
-     * @param http Configuração de segurança HTTP
-     * @return Cadeia de filtros de segurança para o servidor de autorização
-     * @throws Exception Em caso de erro de configuração de segurança
+     * 1) Filtro de segurança para o Servidor de Autorização (endpoints /oauth2/authorize, /oauth2/token etc.).
      */
     @Bean
     @Order(1)
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
         log.info("Configurando filtro de segurança para servidor de autorização");
-        
-        // Aplica a configuração de segurança padrão para servidor de autorização
+
+        // Aplica as configurações padrão do Authorization Server
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        
-        // Configura tratamento de exceções de autenticação
-        http.exceptionHandling(exceptions -> 
-            exceptions.authenticationEntryPoint(
-                new LoginUrlAuthenticationEntryPoint("/login")
-            )
+
+        // Define como tratar falhas de autenticação (redireciona para /login)
+        http.exceptionHandling(exceptions ->
+                exceptions.authenticationEntryPoint(
+                        new LoginUrlAuthenticationEntryPoint("/login")
+                )
         );
-        
+
         return http.build();
     }
 
     /**
-     * Configura o filtro de segurança padrão para a aplicação.
-     * 
-     * Define as regras de autorização para diferentes endpoints, 
-     * configurações de CSRF e opções de login.
-     * 
-     * @param http Configuração de segurança HTTP
-     * @return Cadeia de filtros de segurança padrão
-     * @throws Exception Em caso de erro de configuração de segurança
+     * 2) Filtro de segurança geral (acesso aos endpoints da aplicação).
      */
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        log.info("Configurando filtro de segurança padrão");
-        
-        http.authorizeHttpRequests(authorize -> authorize
-            // Endpoints públicos permitidos sem autenticação
-            .requestMatchers(
-                "/public/**", 
-                "/h2-console/**", 
-                "/swagger-ui/**", 
-                "/swagger-ui.html",
-                "/v3/api-docs/**",
-                "/v3/api-docs.yaml",
-                "/diagnostico/**",
-                "/actuator/**"
-            ).permitAll()
-            // Todos os outros endpoints requerem autenticação
-            .anyRequest().authenticated()
-        )
-        // Desabilita CSRF para endpoints específicos
-        .csrf(csrf -> csrf.ignoringRequestMatchers(
-            "/h2-console/**", 
-            "/swagger-ui/**", 
-            "/v3/api-docs/**",
-            "/oauth2/**"
-        ))
-        // Configura opções de cabeçalho para H2 Console
-        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-        // Configura login padrão
-        .formLogin(Customizer.withDefaults());
-        
+        log.info("Configurando filtro de segurança padrão (Resource Server + Web)");
+
+        http
+            .authorizeHttpRequests(authorize -> authorize
+                // Endpoints públicos que dispensam autenticação
+                .requestMatchers(
+                    "/public/**",
+                    "/h2-console/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml",
+                    "/diagnostico/**",
+                    "/actuator/**"
+                ).permitAll()
+                // Demais endpoints requerem autenticação
+                .anyRequest().authenticated()
+            )
+            // Desabilita CSRF para alguns endpoints (ex.: H2, Swagger)
+            .csrf(csrf -> csrf.ignoringRequestMatchers(
+                    "/h2-console/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/oauth2/**"
+            ))
+            // Permite o uso do H2 Console sem problemas de 'frameOptions'
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+            
+            // Ativa o Resource Server para aceitar e validar tokens JWT
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+
+            // Permite login via formulário para usuários que não estejam usando token
+            .formLogin(Customizer.withDefaults());
+
         return http.build();
     }
 
     /**
-     * Cria um repositório de clientes registrados para OAuth2.
-     * 
-     * Configura um cliente padrão com diferentes tipos de concessão de autorização,
-     * escopos e configurações de token.
-     * 
-     * @return Repositório de clientes registrados
+     * Repositório de clientes OAuth2 (clientId, clientSecret, scopes, etc.) em memória.
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         log.info("Configurando repositório de clientes registrados");
-        
-        // Cria um cliente com configurações detalhadas
+
+        // Configura um client "api-client" com várias grant types
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("api-client")
-            .clientSecret(passwordEncoder().encode("secret"))
+            .clientId(CLIENT_ID)
+            .clientSecret(passwordEncoder().encode(CLIENT_SECRET))  //  Senha fixa e simples usada apenas em DESAFIO/DEMO
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .redirectUri("http://localhost:8080/swagger-ui/oauth2-redirect.html")
-            .scope("api.read")
-            .scope("api.write")
-            // Configurações de tempo de vida do token
+            .redirectUri(REDIRECT_URI_SWAGGER)
+            .scope(SCOPE_READ)
+            .scope(SCOPE_WRITE)
+            // Configura tempos de vida dos tokens
             .tokenSettings(TokenSettings.builder()
                 .accessTokenTimeToLive(Duration.ofMinutes(30))
                 .refreshTokenTimeToLive(Duration.ofDays(1))
                 .build())
-            // Configurações do cliente
+            // Desativa a tela de consentimento (para teste)
             .clientSettings(ClientSettings.builder()
                 .requireAuthorizationConsent(false)
                 .build())
@@ -154,29 +142,23 @@ public class SecurityConfig {
     }
 
     /**
-     * Configura o serviço de detalhes de usuário em memória.
-     * 
-     * Cria usuários padrão para teste e desenvolvimento:
-     * - Usuário admin com papel ADMIN
-     * - Usuário regular com papel USER
-     * 
-     * @return Gerenciador de detalhes de usuário
+     * Define usuários em memória para testes (admin / user).
      */
     @Bean
     public UserDetailsService userDetailsService() {
         log.info("Configurando serviço de detalhes de usuário em memória");
-        
-        // Cria usuário administrador
+
         UserDetails adminUser = User.builder()
             .username("admin")
-            .password(passwordEncoder().encode("admin"))
+            // ATENÇÃO: Uso de senha simples para fins de DEMO
+            .password(passwordEncoder().encode("admin"))  //  Senha fixa e simples usada apenas em DESAFIO/DEMO
             .roles("ADMIN")
             .build();
 
-        // Cria usuário regular
         UserDetails regularUser = User.builder()
             .username("user")
-            .password(passwordEncoder().encode("user"))
+            // ATENÇÃO: Uso de senha simples para fins de DEMO
+            .password(passwordEncoder().encode("user")) //  Senha fixa e simples usada apenas em DESAFIO/DEMO
             .roles("USER")
             .build();
 
@@ -184,12 +166,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Cria um codificador de senhas seguro usando BCrypt.
-     * 
-     * Utiliza BCryptPasswordEncoder com força de hash de 12,
-     * o que proporciona um bom equilíbrio entre segurança e desempenho.
-     * 
-     * @return Codificador de senhas
+     * Cria um codificador de senha (BCrypt) com custo de 12.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -198,17 +175,13 @@ public class SecurityConfig {
     }
 
     /**
-     * Configura as definições do servidor de autorização OAuth2.
-     * 
-     * Define o emissor (issuer) do servidor de autorização.
-     * 
-     * @return Configurações do servidor de autorização
+     * Configurações gerais do Authorization Server (issuer, etc.).
      */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         log.info("Configurando definições do servidor de autorização");
         return AuthorizationServerSettings.builder()
-            .issuer("http://localhost:8080")
+            .issuer(ISSUER_URL)
             .build();
     }
 }

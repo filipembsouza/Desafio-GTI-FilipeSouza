@@ -26,21 +26,21 @@ import java.util.List;
 @Slf4j
 public class FuncionalidadeServiceImpl implements FuncionalidadeService {
 
+    // Constante para mensagem de erro padronizada
     private static final String FUNC_NAO_ENCONTRADA = "Funcionalidade não encontrada com ID: ";
 
     private final FuncionalidadeRepository funcionalidadeRepository;
-    // Removido, pois não está sendo utilizado:
-    // private final VincPerfilFuncionalidadeRepository vincPerfilFuncionalidadeRepository;
 
-    // Lista de funcionalidades essenciais do sistema que não devem ser modificadas ou excluídas
+    // Lista de funcionalidades essenciais do sistema
     private static final List<String> FUNCIONALIDADES_SISTEMA = Arrays.asList(
-            "api.agendamentos.create",
-            "api.agendamentos.read",
-            "api.agendamentos.update",
-            "api.agendamentos.cancel",
-            "api.usuarios.*"
+        "api.agendamentos.create",
+        "api.agendamentos.read",
+        "api.agendamentos.update", 
+        "api.agendamentos.cancel",
+        "api.usuarios.*"
     );
 
+    
     /**
      * Verifica se a funcionalidade é essencial para o sistema.
      *

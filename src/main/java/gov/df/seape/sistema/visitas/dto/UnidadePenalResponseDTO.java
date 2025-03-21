@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadePenalResponseDTO {
-    
+
     private Long id;
     private String nome;
     private String descricao;
     private Integer totalCustodiados;
-    
+
     public UnidadePenalResponseDTO(UnidadePenal unidadePenal) {
         if (unidadePenal != null) {
             this.id = unidadePenal.getId();

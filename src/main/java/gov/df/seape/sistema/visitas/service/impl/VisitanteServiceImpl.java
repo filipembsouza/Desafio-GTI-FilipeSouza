@@ -70,21 +70,25 @@ public class VisitanteServiceImpl implements VisitanteService {
     }
 
     @Override
-    @Transactional
-    public VisitanteResponseDTO atualizarVisitante(Long id, VisitanteRequestDTO requestDTO) {
-        log.info("Atualizando visitante com ID: {}", id);
-        
-        Visitante visitante = visitanteRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + id));
-        
-        // Verificar se já existe outra pessoa com este CPF
-        pessoaRepository.findByCpf(requestDTO.getCpf())
-                .ifPresent(p -> {
-                    if (!p.getId().equals(visitante.getPessoa().getId())) {
-                        log.warn("Tentativa de atualizar visitante com CPF já cadastrado: {}", requestDTO.getCpf());
-                        throw new OperacaoInvalidaException("Já existe outra pessoa cadastrada com o CPF: " + requestDTO.getCpf());
-                    }
-                });
+@Transactional
+public VisitanteResponseDTO atualizarVisitante(Long id, VisitanteRequestDTO requestDTO) {
+    log.info("Atualizando visitante com ID: {}", id);
+
+    // 1. Carrega o visitante existente ou lança exceção
+    Visitante visitante = visitanteRepository.findById(id)
+        .orElseThrow(() -> new RecursoNaoEncontradoException("Visitante não encontrado com ID: " + id));
+
+    // 2. Garante que não existe outra pessoa com o mesmo CPF
+    Long pessoaId = visitante.getPessoa().getId(); // variável efetivamente final
+    pessoaRepository.findByCpf(requestDTO.getCpf())
+        .ifPresent(p -> {
+            if (!p.getId().equals(pessoaId)) {
+                log.warn("Tentativa de atualizar visitante com CPF já cadastrado: {}", requestDTO.getCpf());
+                throw new OperacaoInvalidaException(
+                    "Já existe outra pessoa cadastrada com o CPF: " + requestDTO.getCpf()
+                );
+            }
+        });
         
         // Atualizar pessoa
         Pessoa pessoa = visitante.getPessoa();

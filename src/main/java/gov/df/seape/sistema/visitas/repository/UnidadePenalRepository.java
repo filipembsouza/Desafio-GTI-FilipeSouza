@@ -51,15 +51,35 @@ public interface UnidadePenalRepository extends JpaRepository<UnidadePenal, Long
      * implementação de interfaces que precisam exibir grandes conjuntos de dados de forma
      * controlada (como tabelas com paginação).
      * 
-     * Embora unidades penais normalmente não alcancem grandes volumes, este método
-     * proporciona consistência com outros repositórios e prepara o sistema para
-     * possível expansão futura, além de permitir um padrão uniforme na interface
-     * de usuário para todas as listagens.
-     * 
      * @param nome Termo de busca para o nome
      * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
      * @return Página de unidades penais que atendem ao critério
      */
     @Query("SELECT u FROM UnidadePenal u WHERE LOWER(u.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
     Page<UnidadePenal> findByNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
+    
+    /**
+     * Lista unidades penais que têm custodiados com agendamentos ativos.
+     * 
+     * @return Lista de unidades penais com agendamentos ativos
+     */
+    @Query("SELECT DISTINCT u FROM UnidadePenal u JOIN u.custodiados c JOIN AgendamentoVisita a ON a.custodiado.id = c.id " +
+           "WHERE a.status.descricao <> 'CANCELADO' ORDER BY u.nome ASC")
+    List<UnidadePenal> findWithActiveAgendamentos();
+    
+    /**
+     * Conta quantos custodiados estão em cada unidade penal.
+     * 
+     * @return Lista de arrays contendo o ID da unidade, nome e quantidade de custodiados
+     */
+    @Query("SELECT u.id, u.nome, COUNT(c) FROM UnidadePenal u LEFT JOIN u.custodiados c GROUP BY u.id, u.nome ORDER BY u.nome")
+    List<Object[]> countCustodiadosByUnidade();
+    
+    /**
+     * Busca unidades penais que não têm nenhum custodiado associado.
+     * 
+     * @return Lista de unidades penais sem custodiados
+     */
+    @Query("SELECT u FROM UnidadePenal u WHERE NOT EXISTS (SELECT 1 FROM Custodiado c WHERE c.unidadePenal = u)")
+    List<UnidadePenal> findUnidadesSemCustodiados();
 }

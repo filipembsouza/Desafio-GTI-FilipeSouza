@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -57,8 +56,7 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
      * @return Página de perfis que contêm o termo na descrição
      */
     @Query("SELECT p FROM Perfil p WHERE LOWER(p.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")
-    @NonNull
-    Page<Perfil> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, @NonNull Pageable pageable);
+    Page<Perfil> findByDescricaoContainingIgnoreCase(@Param("descricao") String descricao, Pageable pageable);
     
     /**
      * Lista todos os perfis com suporte a paginação.
@@ -67,9 +65,7 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
      * @param pageable Objeto com informações de paginação
      * @return Página de perfis
      */
-    @Override
-    @NonNull
-    Page<Perfil> findAll(@NonNull Pageable pageable);
+    Page<Perfil> findAll(Pageable pageable);
     
     /**
      * Lista perfis que possuem uma determinada funcionalidade associada.
@@ -92,16 +88,6 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
     List<Perfil> findByFuncionalidadeId(@Param("funcionalidadeId") Long funcionalidadeId);
     
     /**
-     * Lista perfis associados a um determinado usuário.
-     * Útil para verificações de autorização e controle de acesso.
-     * 
-     * @param usuarioId O ID do usuário para buscar perfis associados
-     * @return Lista de perfis associados ao usuário especificado
-     */
-    @Query("SELECT p FROM Perfil p JOIN p.usuarios u WHERE u.id = :usuarioId ORDER BY p.descricao ASC")
-    List<Perfil> findByUsuarioId(@Param("usuarioId") Long usuarioId);
-    
-    /**
      * Verifica se um perfil possui uma determinada funcionalidade.
      * Método útil para validações rápidas de permissão.
      * 
@@ -112,4 +98,23 @@ public interface PerfilRepository extends JpaRepository<Perfil, Long> {
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Perfil p JOIN p.funcionalidades f " +
            "WHERE p.id = :perfilId AND f.id = :funcionalidadeId")
     boolean hasPermission(@Param("perfilId") Long perfilId, @Param("funcionalidadeId") Long funcionalidadeId);
+    
+    /**
+     * Conta quantos usuários têm cada perfil.
+     * Útil para relatórios administrativos e análise de segurança.
+     * 
+     * @return Lista de arrays contendo [ID do perfil, descrição, quantidade de usuários]
+     */
+    @Query("SELECT p.id, p.descricao, COUNT(u) FROM Perfil p LEFT JOIN Usuario u ON u.perfil.id = p.id " +
+           "GROUP BY p.id, p.descricao ORDER BY COUNT(u) DESC")
+    List<Object[]> countUsuariosByPerfil();
+    
+    /**
+     * Lista perfis que não têm nenhum usuário associado.
+     * Útil para identificar perfis que podem ser removidos.
+     * 
+     * @return Lista de perfis sem usuários
+     */
+    @Query("SELECT p FROM Perfil p WHERE NOT EXISTS (SELECT 1 FROM Usuario u WHERE u.perfil = p)")
+    List<Perfil> findPerfisWithoutUsuarios();
 }

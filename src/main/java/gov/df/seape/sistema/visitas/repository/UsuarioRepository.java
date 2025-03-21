@@ -204,4 +204,17 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Page<Usuario> findUsuariosInativos(
             @Param("dataLimite") LocalDateTime dataLimite,
             Pageable pageable);
+    
+    /**
+     * Atualiza a data de último acesso de um usuário.
+     * Útil para registrar atividades e controlar sessões.
+     * 
+     * @param usuarioId ID do usuário
+     * @param ultimoAcesso Nova data de último acesso
+     * @return Número de registros atualizados (deve ser 1 se o usuário existir)
+     */
+    @Query("UPDATE Usuario u SET u.ultimoAcesso = :ultimoAcesso WHERE u.id = :usuarioId")
+    int atualizarUltimoAcesso(
+            @Param("usuarioId") Long usuarioId,
+            @Param("ultimoAcesso") LocalDateTime ultimoAcesso);
 }

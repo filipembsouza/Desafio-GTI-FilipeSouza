@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Repositório para a entidade AgendamentoVisita.
+ * Fornece métodos para realizar operações de banco de dados relacionadas a Agendamentos de Visitas.
  */
 @Repository
 public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVisita, Long> {
@@ -24,24 +25,26 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
     /**
      * Lista todos os agendamentos de um determinado custodiado.
      * 
-     * @param custodiado Custodiado para filtrar os agendamentos
+     * @param custodiado O custodiado para filtrar os agendamentos
      * @return Lista de agendamentos do custodiado especificado
      */
     List<AgendamentoVisita> findByCustodiado(Custodiado custodiado);
     
     /**
-     * Lista todos os agendamentos de um determinado custodiado pelo ID.
+     * Lista todos os agendamentos de um determinado custodiado, usando o ID diretamente.
+     * Esta versão simplifica a busca quando só temos o ID do custodiado,
+     * evitando a necessidade de buscar a entidade Custodiado completa antes.
      * 
-     * @param custodiadoId ID do custodiado para filtrar os agendamentos
+     * @param custodiadoId O ID do custodiado para filtrar os agendamentos
      * @return Lista de agendamentos do custodiado especificado
      */
     List<AgendamentoVisita> findByCustodiadoId(Long custodiadoId);
     
     /**
-     * Lista todos os agendamentos de um determinado custodiado pelo ID com paginação.
+     * Lista todos os agendamentos de um determinado custodiado com suporte a paginação.
      * 
-     * @param custodiadoId ID do custodiado para filtrar os agendamentos
-     * @param pageable Informações de paginação
+     * @param custodiadoId O ID do custodiado para filtrar os agendamentos
+     * @param pageable Objeto com informações de paginação (página, tamanho, ordenação)
      * @return Página de agendamentos do custodiado especificado
      */
     Page<AgendamentoVisita> findByCustodiadoId(Long custodiadoId, Pageable pageable);
@@ -49,24 +52,24 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
     /**
      * Lista todos os agendamentos de um determinado visitante.
      * 
-     * @param visitante Visitante para filtrar os agendamentos
+     * @param visitante O visitante para filtrar os agendamentos
      * @return Lista de agendamentos do visitante especificado
      */
     List<AgendamentoVisita> findByVisitante(Visitante visitante);
     
     /**
-     * Lista todos os agendamentos de um determinado visitante pelo ID.
+     * Lista todos os agendamentos de um determinado visitante, usando o ID diretamente.
      * 
-     * @param visitanteId ID do visitante para filtrar os agendamentos
+     * @param visitanteId O ID do visitante para filtrar os agendamentos
      * @return Lista de agendamentos do visitante especificado
      */
     List<AgendamentoVisita> findByVisitanteId(Long visitanteId);
     
     /**
-     * Lista todos os agendamentos de um determinado visitante pelo ID com paginação.
+     * Lista todos os agendamentos de um determinado visitante com suporte a paginação.
      * 
-     * @param visitanteId ID do visitante para filtrar os agendamentos
-     * @param pageable Informações de paginação
+     * @param visitanteId O ID do visitante para filtrar os agendamentos
+     * @param pageable Objeto com informações de paginação
      * @return Página de agendamentos do visitante especificado
      */
     Page<AgendamentoVisita> findByVisitanteId(Long visitanteId, Pageable pageable);
@@ -74,50 +77,42 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
     /**
      * Lista todos os agendamentos com um determinado status.
      * 
-     * @param status Status para filtrar os agendamentos
+     * @param status O status para filtrar os agendamentos
      * @return Lista de agendamentos com o status especificado
      */
     List<AgendamentoVisita> findByStatus(Status status);
     
     /**
-     * Lista todos os agendamentos com um determinado status pelo ID.
+     * Lista todos os agendamentos com um determinado status, usando o ID diretamente.
      * 
-     * @param statusId ID do status para filtrar os agendamentos
+     * @param statusId O ID do status para filtrar os agendamentos
      * @return Lista de agendamentos com o status especificado
      */
     List<AgendamentoVisita> findByStatusId(Long statusId);
     
     /**
-     * Lista todos os agendamentos com um determinado status pelo ID com paginação.
+     * Lista todos os agendamentos com um determinado status com suporte a paginação.
      * 
-     * @param statusId ID do status para filtrar os agendamentos
-     * @param pageable Informações de paginação
+     * @param statusId O ID do status para filtrar os agendamentos
+     * @param pageable Objeto com informações de paginação
      * @return Página de agendamentos com o status especificado
      */
     Page<AgendamentoVisita> findByStatusId(Long statusId, Pageable pageable);
     
     /**
-     * Conta o número de agendamentos com um determinado status.
+     * Lista agendamentos para uma data específica (considerando apenas a data, não a hora).
      * 
-     * @param statusId ID do status
-     * @return Número de agendamentos com o status especificado
-     */
-    long countByStatusId(Long statusId);
-    
-    /**
-     * Lista agendamentos para uma data específica.
-     * 
-     * @param data Data para filtrar os agendamentos
+     * @param data A data para filtrar os agendamentos
      * @return Lista de agendamentos para a data especificada
      */
     @Query("SELECT a FROM AgendamentoVisita a WHERE FUNCTION('DATE', a.dataHoraAgendamento) = :data")
-    List<AgendamentoVisita> findByData(@Param("data") LocalDate data);
+    List<AgendamentoVisita> findByData(@Param("data") LocalDate data);    
     
     /**
-     * Lista agendamentos para uma data específica com paginação.
+     * Lista agendamentos para uma data específica com suporte a paginação.
      * 
-     * @param data Data para filtrar os agendamentos
-     * @param pageable Informações de paginação
+     * @param data A data para filtrar os agendamentos
+     * @param pageable Objeto com informações de paginação
      * @return Página de agendamentos para a data especificada
      */
     @Query("SELECT a FROM AgendamentoVisita a WHERE FUNCTION('DATE', a.dataHoraAgendamento) = :data")
@@ -130,44 +125,53 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
      * @param fim Data e hora de fim do período
      * @return Lista de agendamentos dentro do período especificado
      */
-    @Query("SELECT a FROM AgendamentoVisita a WHERE a.dataHoraAgendamento BETWEEN :inicio AND :fim ORDER BY a.dataHoraAgendamento ASC")
-    List<AgendamentoVisita> findByPeriodo(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
-    
-    /**
-     * Conta o número de agendamentos para um custodiado em um determinado período.
-     * 
-     * @param custodiadoId ID do custodiado
-     * @param inicio Data e hora de início do período
-     * @param fim Data e hora de fim do período
-     * @return Número de agendamentos do custodiado no período especificado
-     */
-    @Query("SELECT COUNT(a) FROM AgendamentoVisita a WHERE a.custodiado.id = :custodiadoId AND a.dataHoraAgendamento BETWEEN :inicio AND :fim")
-    long countByCustodiadoIdAndDataHoraAgendamentoBetween(
-            @Param("custodiadoId") Long custodiadoId,
-            @Param("inicio") LocalDateTime inicio,
-            @Param("fim") LocalDateTime fim);
-
-    /**
-     * Lista agendamentos de visitante em um determinado período.
-     * 
-     * @param visitanteId ID do visitante
-     * @param inicio Data e hora de início do período
-     * @param fim Data e hora de fim do período
-     * @return Lista de agendamentos do visitante no período especificado
-     */
-    @Query("SELECT a FROM AgendamentoVisita a WHERE a.visitante.id = :visitanteId AND a.dataHoraAgendamento BETWEEN :inicio AND :fim ORDER BY a.dataHoraAgendamento ASC")
-    List<AgendamentoVisita> findByVisitanteIdAndDataHoraAgendamenteBetween(
-            @Param("visitanteId") Long visitanteId,
-            @Param("inicio") LocalDateTime inicio,
+    @Query("SELECT a FROM AgendamentoVisita a WHERE a.dataHoraAgendamento BETWEEN :inicio AND :fim")
+    List<AgendamentoVisita> findByPeriodo(
+            @Param("inicio") LocalDateTime inicio, 
             @Param("fim") LocalDateTime fim);
     
     /**
-     * Lista agendamentos conflitantes para um mesmo custodiado.
+     * Lista agendamentos dentro de um período específico com suporte a paginação.
      * 
-     * @param custodiadoId ID do custodiado
      * @param inicio Data e hora de início do período
      * @param fim Data e hora de fim do período
-     * @param statusCanceladoId ID do status CANCELADO
+     * @param pageable Objeto com informações de paginação
+     * @return Página de agendamentos dentro do período especificado
+     */
+    @Query("SELECT a FROM AgendamentoVisita a WHERE a.dataHoraAgendamento BETWEEN :inicio AND :fim")
+    Page<AgendamentoVisita> findByPeriodo(
+            @Param("inicio") LocalDateTime inicio, 
+            @Param("fim") LocalDateTime fim,
+            Pageable pageable);
+    
+    /**
+     * Verifica se existem agendamentos conflitantes para um mesmo custodiado.
+     * Esta consulta é fundamental para implementar a regra de negócio que não
+     * permite agendamentos conflitantes para o mesmo detento em um mesmo horário.
+     * 
+     * @param custodiado O custodiado para verificar
+     * @param inicio Data e hora de início do período
+     * @param fim Data e hora de fim do período
+     * @param statusCancelado Status que representa agendamentos cancelados
+     * @return Lista de agendamentos que possam entrar em conflito
+     */
+    @Query("SELECT a FROM AgendamentoVisita a WHERE a.custodiado = :custodiado " +
+           "AND a.status != :statusCancelado " +
+           "AND a.dataHoraAgendamento BETWEEN :inicio AND :fim " +
+           "ORDER BY a.dataHoraAgendamento ASC")
+    List<AgendamentoVisita> findAgendamentosConflitantes(
+            @Param("custodiado") Custodiado custodiado,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("statusCancelado") Status statusCancelado);
+    
+    /**
+     * Verifica se existem agendamentos conflitantes para um mesmo custodiado, usando IDs diretamente.
+     * 
+     * @param custodiadoId O ID do custodiado para verificar
+     * @param inicio Data e hora de início do período
+     * @param fim Data e hora de fim do período
+     * @param statusCanceladoId O ID do status que representa agendamentos cancelados
      * @return Lista de agendamentos que possam entrar em conflito
      */
     @Query("SELECT a FROM AgendamentoVisita a WHERE a.custodiado.id = :custodiadoId " +
@@ -179,40 +183,32 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim,
             @Param("statusCanceladoId") Long statusCanceladoId);
-    
+
     /**
-     * Busca agendamentos com filtros combinados.
+     * Conta quantas visitas foram agendadas para um custodiado em um determinado dia.
+     * Essa consulta é usada para garantir que um custodiado não receba mais de 2 visitantes no mesmo dia.
      * 
-     * @param custodiado Custodiado para filtrar (opcional)
-     * @param visitante Visitante para filtrar (opcional)
-     * @param inicio Data e hora de início do período (opcional)
-     * @param fim Data e hora de fim do período (opcional)
-     * @param status Status para filtrar (opcional)
-     * @return Lista de agendamentos que atendem aos critérios especificados
+     * @param custodiadoId ID do custodiado para verificar as visitas.
+     * @param inicioDia Início do período (início do dia).
+     * @param fimDia Fim do período (fim do dia).
+     * @return O número de visitas agendadas para o custodiado no período especificado.
      */
-    @Query("SELECT a FROM AgendamentoVisita a WHERE " +
-           "(:custodiado IS NULL OR a.custodiado = :custodiado) AND " +
-           "(:visitante IS NULL OR a.visitante = :visitante) AND " +
-           "(:inicio IS NULL OR a.dataHoraAgendamento >= :inicio) AND " +
-           "(:fim IS NULL OR a.dataHoraAgendamento <= :fim) AND " +
-           "(:status IS NULL OR a.status = :status) " +
-           "ORDER BY a.dataHoraAgendamento DESC")
-    List<AgendamentoVisita> findComFiltros(
-            @Param("custodiado") Custodiado custodiado,
-            @Param("visitante") Visitante visitante,
-            @Param("inicio") LocalDateTime inicio,
-            @Param("fim") LocalDateTime fim,
-            @Param("status") Status status);
+    @Query("SELECT COUNT(a) FROM AgendamentoVisita a WHERE a.custodiado.id = :custodiadoId " +
+           "AND a.dataHoraAgendamento BETWEEN :inicioDia AND :fimDia")
+    long countByCustodiadoIdAndDataHoraAgendamentoBetween(
+            @Param("custodiadoId") Long custodiadoId,
+            @Param("inicioDia") LocalDateTime inicioDia,
+            @Param("fimDia") LocalDateTime fimDia);
     
     /**
-     * Busca agendamentos com filtros combinados e paginação.
+     * Busca agendamentos com filtros combinados (custodiado, visitante e período).
      * 
-     * @param custodiadoId ID do custodiado para filtrar (opcional)
-     * @param visitanteId ID do visitante para filtrar (opcional)
+     * @param custodiadoId O ID do custodiado para filtrar (opcional)
+     * @param visitanteId O ID do visitante para filtrar (opcional)
      * @param inicio Data e hora de início do período (opcional)
      * @param fim Data e hora de fim do período (opcional)
-     * @param statusId ID do status para filtrar (opcional)
-     * @param pageable Informações de paginação
+     * @param statusId O ID do status para filtrar (opcional)
+     * @param pageable Objeto com informações de paginação
      * @return Página de agendamentos que atendem aos critérios especificados
      */
     @Query("SELECT a FROM AgendamentoVisita a WHERE " +
@@ -228,14 +224,38 @@ public interface AgendamentoVisitaRepository extends JpaRepository<AgendamentoVi
             @Param("fim") LocalDateTime fim,
             @Param("statusId") Long statusId,
             Pageable pageable);
-            
+    
     /**
-     * Lista IDs de visitantes que visitaram um determinado custodiado.
+     * Retorna estatísticas de agendamentos por status em um período específico.
      * 
-     * @param custodiadoId ID do custodiado
-     * @return Lista de IDs de visitantes
+     * @param inicio Data de início do período
+     * @param fim Data de fim do período
+     * @return Lista contendo status e quantidade de agendamentos em cada status
      */
-    @Query("SELECT DISTINCT a.visitante.id FROM AgendamentoVisita a " +
-           "WHERE a.custodiado.id = :custodiadoId AND a.status.descricao <> 'CANCELADO'")
-    List<Long> findVisitanteIdsByCustodiadoId(@Param("custodiadoId") Long custodiadoId);
+    @Query("SELECT a.status.descricao as status, COUNT(a) as quantidade FROM AgendamentoVisita a " +
+           "WHERE a.dataHoraAgendamento BETWEEN :inicio AND :fim " +
+           "GROUP BY a.status.descricao ORDER BY COUNT(a) DESC")
+    List<Object[]> contarAgendamentosPorStatus(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim);
+    
+    /**
+     * Verifica se um visitante já tem agendamento no horário especificado.
+     * Importante para garantir que um visitante não tenha dois agendamentos ao mesmo tempo.
+     * 
+     * @param visitanteId ID do visitante
+     * @param inicio Início do período de verificação
+     * @param fim Fim do período de verificação
+     * @param statusCanceladoId ID do status cancelado
+     * @return true se existir agendamento no horário, false caso contrário
+     */
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM AgendamentoVisita a " +
+           "WHERE a.visitante.id = :visitanteId " +
+           "AND a.status.id != :statusCanceladoId " +
+           "AND a.dataHoraAgendamento BETWEEN :inicio AND :fim")
+    boolean existsAgendamentoVisitanteNoHorario(
+            @Param("visitanteId") Long visitanteId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("statusCanceladoId") Long statusCanceladoId);
 }

@@ -15,26 +15,19 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/diagnostico")
-@Tag(name = "Diagnóstico", description = "Endpoints para diagnóstico e verificação do sistema")
+@Tag(name = "Diagnóstico")
 public class DiagnosticoController {
-
     @GetMapping("/swagger-status")
-    @Operation(
-        summary = "Verificar status do Swagger",
-        description = "Endpoint para verificar se a configuração do Swagger está funcionando corretamente"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Swagger funcionando corretamente"),
-    })
-    @SecurityRequirements() // Remover requisitos de segurança para este endpoint
-    public ResponseEntity<Map<String, Object>> getSwaggerStatus() {
+    @Operation(summary = "Verificar status do Swagger")
+    @SecurityRequirements() // Remove requisitos de segurança
+    public Map<String, Object> getSwaggerStatus() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "online");
-        response.put("message", "Swagger está configurado e funcionando corretamente!");
-        response.put("timestamp", System.currentTimeMillis());
-        
-        return ResponseEntity.ok(response);
+        response.put("swagger-ui", "/swagger-ui/index.html");
+        response.put("api-docs", "/v3/api-docs");
+        return response;
     }
+}
 
     @GetMapping("/api-info")
     @Operation(

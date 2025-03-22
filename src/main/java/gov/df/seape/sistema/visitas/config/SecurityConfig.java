@@ -66,7 +66,8 @@ public class SecurityConfig {
                     "/login",
                     "/error",
                     "/webjars/**",
-                    "/actuator/**"
+                    "/actuator/**",
+                    "/diagnostico/**"  // Também incluir endpoints de diagnóstico
                 ).permitAll()
                 .anyRequest().authenticated()
             )

@@ -58,24 +58,30 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",
+                    "/swagger-resources/**",
                     "/v3/api-docs/**",
                     "/v3/api-docs.yaml",
                     "/h2-console/**",
                     "/oauth2/**",
                     "/login",
+                    "/error",
+                    "/webjars/**",
                     "/actuator/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .csrf(csrf -> csrf.ignoringRequestMatchers(
-                    "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/oauth2/**"
+                    "/h2-console/**", 
+                    "/swagger-ui/**", 
+                    "/v3/api-docs/**", 
+                    "/oauth2/**"
             ))
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .formLogin(Customizer.withDefaults());
+        
         return http.build();
     }
-
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())

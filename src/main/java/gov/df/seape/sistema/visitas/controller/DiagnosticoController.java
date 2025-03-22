@@ -1,30 +1,55 @@
 package gov.df.seape.sistema.visitas.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/diagnostico")
-@Tag(name = "Diagnóstico", description = "Endpoints para diagnóstico do sistema")
+@Tag(name = "Diagnóstico", description = "Endpoints para diagnóstico e verificação do sistema")
 public class DiagnosticoController {
 
-    @GetMapping("/status")
-    @Operation(summary = "Verificar status da API", 
-               description = "Endpoint para verificar se a API está funcionando corretamente")
-    @ApiResponse(responseCode = "200", description = "API funcionando normalmente")
-    public String getStatus() {
-        return "API funcionando corretamente. Se você está vendo esta mensagem, o controller está respondendo.";
+    @GetMapping("/swagger-status")
+    @Operation(
+        summary = "Verificar status do Swagger",
+        description = "Endpoint para verificar se a configuração do Swagger está funcionando corretamente"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Swagger funcionando corretamente"),
+    })
+    @SecurityRequirements() // Remover requisitos de segurança para este endpoint
+    public ResponseEntity<Map<String, Object>> getSwaggerStatus() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "online");
+        response.put("message", "Swagger está configurado e funcionando corretamente!");
+        response.put("timestamp", System.currentTimeMillis());
+        
+        return ResponseEntity.ok(response);
     }
-    
-    @GetMapping("/swagger-info")
-    @Operation(summary = "Informações do Swagger", 
-               description = "Informações para debug do Swagger")
-    public String getSwaggerInfo() {
-        return "Este endpoint é para verificar se as anotações do Swagger estão sendo processadas corretamente.";
+
+    @GetMapping("/api-info")
+    @Operation(
+        summary = "Informações da API",
+        description = "Retorna informações básicas sobre a API"
+    )
+    @SecurityRequirements() // Remover requisitos de segurança para este endpoint
+    public ResponseEntity<Map<String, Object>> getApiInfo() {
+        Map<String, Object> info = new HashMap<>();
+        info.put("name", "Sistema de Gestão de Visitas para Unidade Prisional");
+        info.put("version", "1.0.0");
+        info.put("description", "API REST para gerenciar o fluxo de visitas em uma unidade prisional");
+        info.put("swaggerUrl", "/swagger-ui/index.html");
+        info.put("apiDocsUrl", "/v3/api-docs");
+        
+        return ResponseEntity.ok(info);
     }
 }

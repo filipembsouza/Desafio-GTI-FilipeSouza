@@ -4,81 +4,93 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
-import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
 
-    // Nome do esquema de segurança no Swagger
-    private static final String OAUTH_SCHEME_NAME = "oauth2";
+    @Value("${spring.application.name:sistema-visitas}")
+    private String applicationName;
 
-    // URLs do Authorization Server
-    private static final String TOKEN_URL = "http://localhost:8080/oauth2/token";
-    private static final String AUTHORIZATION_URL = "http://localhost:8080/oauth2/authorize";
+    @Value("${springdoc.swagger-ui.oauth.token-url:http://localhost:8080/oauth2/token}")
+    private String tokenUrl;
 
-    // Scopes e descrições
-    private static final String SCOPE_READ = "api.read";
-    private static final String DESC_READ = "Acesso de leitura à API";
-    private static final String SCOPE_WRITE = "api.write";
-    private static final String DESC_WRITE = "Acesso de escrita à API";
+    @Value("${springdoc.swagger-ui.oauth.authorization-url:http://localhost:8080/oauth2/authorize}")
+    private String authorizationUrl;
+
+    @Value("${springdoc.swagger-ui.oauth.client-id:api-client}")
+    private String clientId;
 
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
                         .title("Sistema de Gestão de Visitas para Unidade Prisional")
-                        .version("1.0")
                         .description("API REST para gerenciar o fluxo de visitas em uma unidade prisional")
+                        .version("1.0.0")
+                        .license(new License().name("Governo do Distrito Federal").url("https://www.df.gov.br"))
                         .contact(new Contact()
                                 .name("GTI SEAPE-DF")
-                                .email("gti@seape.df.gov.br"))
-                )
+                                .email("gti@seape.df.gov.br")
+                                .url("https://www.seape.df.gov.br")))
+                .servers(servers())
                 .components(new Components()
-                        .addSecuritySchemes(OAUTH_SCHEME_NAME, createOAuthScheme())
-                )
-                .addSecurityItem(new SecurityRequirement().addList(OAUTH_SCHEME_NAME));
+                        .addSecuritySchemes("oauth2", createOAuthSecurityScheme())
+                        .addSecuritySchemes("bearer-jwt", createBearerSecurityScheme()))
+                .addSecurityItem(new SecurityRequirement()
+                        .addList("oauth2", Arrays.asList("api.read", "api.write"))
+                        .addList("bearer-jwt"));
     }
 
-    /**
-     * Cria a configuração do esquema de segurança OAuth2 para o Swagger/OpenAPI.
-     */
-    private SecurityScheme createOAuthScheme() {
+    private List<Server> servers() {
+        Server localServer = new Server();
+        localServer.setUrl("http://localhost:8080");
+        localServer.setDescription("Servidor de Desenvolvimento");
+
+        return Arrays.asList(localServer);
+    }
+
+    private SecurityScheme createOAuthSecurityScheme() {
         OAuthFlows flows = new OAuthFlows()
-                // Fluxo Client Credentials
-                .clientCredentials(new OAuthFlow()
-                        .tokenUrl(TOKEN_URL)
-                        .scopes(new Scopes()
-                                .addString(SCOPE_READ, DESC_READ)
-                                .addString(SCOPE_WRITE, DESC_WRITE)
-                        )
-                )
-                // Fluxo Password
                 .password(new OAuthFlow()
-                        .tokenUrl(TOKEN_URL)
-                        .scopes(new Scopes()
-                                .addString(SCOPE_READ, DESC_READ)
-                                .addString(SCOPE_WRITE, DESC_WRITE)
-                        )
-                )
-                // Fluxo Authorization Code
+                        .tokenUrl(tokenUrl)
+                        .scopes(new io.swagger.v3.oas.models.security.Scopes()
+                                .addString("api.read", "Acesso de leitura à API")
+                                .addString("api.write", "Acesso de escrita à API")))
+                .clientCredentials(new OAuthFlow()
+                        .tokenUrl(tokenUrl)
+                        .scopes(new io.swagger.v3.oas.models.security.Scopes()
+                                .addString("api.read", "Acesso de leitura à API")
+                                .addString("api.write", "Acesso de escrita à API")))
                 .authorizationCode(new OAuthFlow()
-                        .authorizationUrl(AUTHORIZATION_URL)
-                        .tokenUrl(TOKEN_URL)
-                        .scopes(new Scopes()
-                                .addString(SCOPE_READ, DESC_READ)
-                                .addString(SCOPE_WRITE, DESC_WRITE)
-                        )
-                );
+                        .authorizationUrl(authorizationUrl)
+                        .tokenUrl(tokenUrl)
+                        .scopes(new io.swagger.v3.oas.models.security.Scopes()
+                                .addString("api.read", "Acesso de leitura à API")
+                                .addString("api.write", "Acesso de escrita à API")));
 
         return new SecurityScheme()
                 .type(SecurityScheme.Type.OAUTH2)
-                .description("Autenticação OAuth2 usando o Servidor de Autorização")
+                .description("Autenticação OAuth2")
                 .flows(flows);
+    }
+
+    private SecurityScheme createBearerSecurityScheme() {
+        return new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .description("Token JWT de autenticação");
     }
 }

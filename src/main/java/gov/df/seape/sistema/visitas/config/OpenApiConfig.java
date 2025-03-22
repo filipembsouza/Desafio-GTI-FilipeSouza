@@ -20,6 +20,11 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    private static final String SCOPE_API_READ = "api.read";
+    private static final String SCOPE_API_WRITE = "api.write";
+    private static final String DESC_ACESSO_LEITURA = "Acesso de leitura à API";
+    private static final String DESC_ACESSO_ESCRITA = "Acesso de escrita à API";
+
     @Value("${spring.application.name:sistema-visitas}")
     private String applicationName;
 
@@ -49,7 +54,8 @@ public class OpenApiConfig {
                         .addSecuritySchemes("oauth2", createOAuthSecurityScheme())
                         .addSecuritySchemes("bearer-jwt", createBearerSecurityScheme()))
                 .addSecurityItem(new SecurityRequirement()
-                        .addList("oauth2", Arrays.asList("api.read", "api.write"))
+                        // Uso das constantes aqui:
+                        .addList("oauth2", Arrays.asList(SCOPE_API_READ, SCOPE_API_WRITE))
                         .addList("bearer-jwt"));
     }
 
@@ -66,19 +72,20 @@ public class OpenApiConfig {
                 .password(new OAuthFlow()
                         .tokenUrl(tokenUrl)
                         .scopes(new io.swagger.v3.oas.models.security.Scopes()
-                                .addString("api.read", "Acesso de leitura à API")
-                                .addString("api.write", "Acesso de escrita à API")))
+                                // Uso das constantes aqui:
+                                .addString(SCOPE_API_READ, DESC_ACESSO_LEITURA)
+                                .addString(SCOPE_API_WRITE, DESC_ACESSO_ESCRITA)))
                 .clientCredentials(new OAuthFlow()
                         .tokenUrl(tokenUrl)
                         .scopes(new io.swagger.v3.oas.models.security.Scopes()
-                                .addString("api.read", "Acesso de leitura à API")
-                                .addString("api.write", "Acesso de escrita à API")))
+                                .addString(SCOPE_API_READ, DESC_ACESSO_LEITURA)
+                                .addString(SCOPE_API_WRITE, DESC_ACESSO_ESCRITA)))
                 .authorizationCode(new OAuthFlow()
                         .authorizationUrl(authorizationUrl)
                         .tokenUrl(tokenUrl)
                         .scopes(new io.swagger.v3.oas.models.security.Scopes()
-                                .addString("api.read", "Acesso de leitura à API")
-                                .addString("api.write", "Acesso de escrita à API")));
+                                .addString(SCOPE_API_READ, DESC_ACESSO_LEITURA)
+                                .addString(SCOPE_API_WRITE, DESC_ACESSO_ESCRITA)));
 
         return new SecurityScheme()
                 .type(SecurityScheme.Type.OAUTH2)
